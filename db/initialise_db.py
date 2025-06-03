@@ -55,3 +55,8 @@ def prefill_lib_data(conn: sqlite3.Connection):
         cur.execute(f"insert into organ_names values ('{organ_name}');")
 
     conn.commit()
+
+def init_db( conn: sqlite3.Connection):
+    """Creates all tables and prefill the base libraries data"""
+    create_tables(conn)
+    prefill_lib_data(conn)

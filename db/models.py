@@ -19,6 +19,7 @@ class OrganName:
 
 @dataclass
 class Organ:
+    id: str
     organ_name: str
     blood_type: str
 

@@ -28,6 +28,38 @@ class QueryService:
     def _prepare_insert_stmt(self, dc: "BaseDT") -> Tuple[str, Tuple[Any]]:
         """Creates INSERT SQL statement, returns the statement and values"""
         table_name, columns, values = self._prepare_dataclass(dc)
+        # As we rely on autocreated by DB IDs dropping the first col/val if it's 'id'
+        if columns[0] == 'id':
+            columns, values = columns[1:], values[1:]
         placeholders = ', '.join('?' for _ in values)
-        sql = "INSERT INTO {} ({}) VALUES ({})".format(table_name, columns, placeholders)
+        sql = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders}) RETURNING *"
         return sql, values
+
+    def _prepare_update_stmt(self, dc: "BaseDT") -> Tuple[str, Tuple[Any], Tuple[Any]]:
+        """Creates UPDATE SQL statement, returns the statement and values"""
+        # DB structure assume that first column is either id (PK / FK) or it is library table
+        # where text value is also PK
+        table_name, columns, values = self._prepare_dataclass(dc)
+        value_columns = columns if len(columns) == 1 else columns[1:]
+        cols_with_placeholders = ', '.join(f"{column} = ?" for column in value_columns)
+        sql = f"UPDATE {table_name} SET {cols_with_placeholders} WHERE {columns[0]} = ? RETURNING *"
+        return sql, values
+
+    def _prepare_delete_stmt(self, dc: "BaseDT") -> Tuple[str, Tuple[Any]]:
+        """Creates DELETE SQL statement, returns the statement and values"""
+        table_name, columns, values = self._prepare_dataclass(dc)
+        if not columns[0].endswith('id'):
+            raise ValueError("Attempt to delete non-id column, are you trying to remove library value?..")
+        sql = f"DELETE FROM {table_name} WHERE {columns[0]} = ?"
+        return sql, (values[0],)
+
+    def create(self, dc: "BaseDT") -> "BaseDT":
+        "Creates new DB record of given object, auto-sets its ID"
+        stmt, values = self._prepare_insert_stmt(dc)
+        cursor = self.conn.cursor()
+        cursor.execute(stmt, values)
+        inserted = cursor.fetchone()
+
+        dc.id = inserted[0]
+        self.conn.commit()
+        return dc

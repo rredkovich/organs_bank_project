@@ -1,5 +1,15 @@
+import sqlite3
 import pytest
+from db.initialise_db import init_db
 from db.models import BloodType, Organ, Gender
+
+@pytest.fixture(scope="session")
+def db_connection():
+    conn = sqlite3.connect(":memory:")
+    # setup schema
+    init_db(conn)
+    yield conn
+    conn.close()
 
 @pytest.fixture
 def gender_male():
@@ -20,14 +30,25 @@ def blood_type_a_negative():
 @pytest.fixture
 def organ_heart():
     return Organ(
+        id=1,
         organ_name="heart",
         blood_type="A+",
     )
 
 # TODO: fixture reuse don't work here!
 @pytest.fixture
-def kidney_a_negative(blood_type_a_negative):
+def organ_kidney_a_negative():
     return Organ(
+        id=2,
         organ_name="kidney",
-        blood_type=blood_type_a_negative.blood_type
+        blood_type="A-"
     )
+
+# # TODO: fixture reuse don't work here!
+# @pytest.fixture
+# def organ_kidney_a_negative(blood_type_a_negative):
+#     return Organ(
+#         id=2,
+#         organ_name="kidney",
+#         blood_type=blood_type_a_negative.blood_type
+#     )

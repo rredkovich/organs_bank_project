@@ -18,10 +18,11 @@ CREATE TABLE organ_names (
 
 create_table_organs = """
 CREATE TABLE organs (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     organ_name TEXT NOT NULL,
     blood_type TEXT NOT NULL,
-    FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name),
-    FOREIGN KEY (blood_type) REFERENCES blood_types(blood_type)
+    FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name) ON UPDATE CASCADE,
+    FOREIGN KEY (blood_type) REFERENCES blood_types(blood_type) ON UPDATE CASCADE
 );
 """
 
@@ -39,8 +40,8 @@ CREATE TABLE donors (
     phone TEXT, 
     address TEXT,
     notes TEXT,
-    FOREIGN KEY (gender) REFERENCES genders (gender),
-    FOREIGN KEY (blood_type) REFERENCES blood_types (blood_type)
+    FOREIGN KEY (gender) REFERENCES genders (gender) ON UPDATE CASCADE,
+    FOREIGN KEY (blood_type) REFERENCES blood_types (blood_type) ON UPDATE CASCADE
 );
 """
 
@@ -57,8 +58,8 @@ CREATE TABLE acceptors (
     phone TEXT,
     address TEXT,
     notes TEXT,
-    FOREIGN KEY (gender) REFERENCES genders(gender),
-    FOREIGN KEY (blood_type) REFERENCES blood_types(blood_type)
+    FOREIGN KEY (gender) REFERENCES genders(gender) ON UPDATE CASCADE,
+    FOREIGN KEY (blood_type) REFERENCES blood_types(blood_type) ON UPDATE CASCADE
     );
 """
 
@@ -84,7 +85,7 @@ CREATE TABLE donated_organs (
     extraction_ts DATETIME NOT NULL,
     expiration_ts DATETIME,
     FOREIGN KEY (donor_id) REFERENCES donors(donor_id),
-    FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name)
+    FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name) ON UPDATE CASCADE
 );"""
 
 
@@ -93,7 +94,7 @@ CREATE TABLE organs_waiting_queue (
     acceptor_id INTEGER NOT NULL,
     organ_name TEXT,
     FOREIGN KEY (acceptor_id) REFERENCES acceptors(acceptor_id),
-    FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name)
+    FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name) ON UPDATE CASCADE
 );"""
 
 all_tables = (
