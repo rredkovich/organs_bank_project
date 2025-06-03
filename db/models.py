@@ -19,13 +19,13 @@ class OrganName:
 
 @dataclass
 class Organ:
-    id: str
+    id: int
     organ_name: str
     blood_type: str
 
 @dataclass
 class Donor:
-    donor_id: int
+    id: int
     name: str
     registration_date: datetime
     birthdate: datetime
@@ -40,7 +40,7 @@ class Donor:
 
 @dataclass
 class Acceptor:
-    acceptor_id: int
+    id: int
     name: str
     registration_date: datetime
     birthdate: datetime
@@ -70,6 +70,6 @@ class DonatedOrgan:
     expiration_ts: Optional[datetime] = None
 
 @dataclass
-class OrganWaitingQueue:
+class AwaitedOrgan:
     acceptor_id: int
     organ_name: Optional[str] = None

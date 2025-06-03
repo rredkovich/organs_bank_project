@@ -1,7 +1,10 @@
 import sqlite3
+from datetime import datetime, date
+
 import pytest
 from db.initialise_db import init_db
-from db.models import BloodType, Organ, Gender
+from db.models import BloodType, Organ, Gender, Acceptor
+
 
 @pytest.fixture(scope="session")
 def db_connection():
@@ -52,3 +55,19 @@ def organ_kidney_a_negative():
 #         organ_name="kidney",
 #         blood_type=blood_type_a_negative.blood_type
 #     )
+
+@pytest.fixture
+def acceptor():
+    return Acceptor(
+        id=None,
+        name='Lina Doe',
+        registration_date=datetime.now().date(),
+        birthdate=date(1970, 1, 12),
+        blood_type="A-",
+        gender="female",
+        height=176,
+        weight=59,
+        phone='0000000',
+        address='fake one',
+        notes=''
+    )

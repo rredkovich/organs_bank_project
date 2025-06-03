@@ -1,18 +1,21 @@
 create_table_genders = """
 CREATE TABLE genders (
-    gender TEXT PRIMARY KEY NOT NULL
+    gender TEXT PRIMARY KEY NOT NULL,
+    created_at DATETIME NOT NULL default CURRENT_TIMESTAMP
 );
 """
 
 create_table_blood_types = """
 CREATE TABLE blood_types (
-    blood_type TEXT PRIMARY KEY NOT NULL
+    blood_type TEXT PRIMARY KEY NOT NULL,
+    created_at DATETIME  NOT NULL default CURRENT_TIMESTAMP
 );
 """
 
 create_table_organ_names = """
 CREATE TABLE organ_names (
-    organ_name TEXT PRIMARY KEY NOT NULL
+    organ_name TEXT PRIMARY KEY NOT NULL,
+    created_at DATETIME  NOT NULL default CURRENT_TIMESTAMP
 );
 """
 
@@ -21,6 +24,7 @@ CREATE TABLE organs (
     id         INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     organ_name TEXT NOT NULL,
     blood_type TEXT NOT NULL,
+    created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
     FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name) ON UPDATE CASCADE,
     FOREIGN KEY (blood_type) REFERENCES blood_types(blood_type) ON UPDATE CASCADE
 );
@@ -40,6 +44,7 @@ CREATE TABLE donors (
     phone TEXT, 
     address TEXT,
     notes TEXT,
+    created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
     FOREIGN KEY (gender) REFERENCES genders (gender) ON UPDATE CASCADE,
     FOREIGN KEY (blood_type) REFERENCES blood_types (blood_type) ON UPDATE CASCADE
 );
@@ -58,6 +63,7 @@ CREATE TABLE acceptors (
     phone TEXT,
     address TEXT,
     notes TEXT,
+    created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
     FOREIGN KEY (gender) REFERENCES genders(gender) ON UPDATE CASCADE,
     FOREIGN KEY (blood_type) REFERENCES blood_types(blood_type) ON UPDATE CASCADE
     );
@@ -67,6 +73,7 @@ create_table_donor_photos = """
 CREATE TABLE donor_photos (
     donor_id            INTEGER NOT NULL, 
     photo BINARY NOT NULL,
+    created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
     FOREIGN KEY (donor_id) REFERENCES donors(donor_id)
 );"""
 
@@ -74,6 +81,7 @@ create_table_acceptor_photos = """
 CREATE TABLE acceptor_photos (
     acceptor_id  INTEGER NOT NULL, 
     photo BINARY NOT NULL,
+    created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
     FOREIGN KEY (acceptor_id) REFERENCES acceptors(acceptor_id)
 );
 """
@@ -84,15 +92,16 @@ CREATE TABLE donated_organs (
     organ_name TEXT NOT NULL,
     extraction_ts DATETIME NOT NULL,
     expiration_ts DATETIME,
+    created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
     FOREIGN KEY (donor_id) REFERENCES donors(donor_id),
     FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name) ON UPDATE CASCADE
 );"""
 
-
-create_table_organs_waiting_queue = """
-CREATE TABLE organs_waiting_queue (
+create_awaited_organs = """
+CREATE TABLE awaited_organs (
     acceptor_id INTEGER NOT NULL,
     organ_name TEXT,
+    created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
     FOREIGN KEY (acceptor_id) REFERENCES acceptors(acceptor_id),
     FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name) ON UPDATE CASCADE
 );"""
@@ -107,5 +116,5 @@ all_tables = (
     create_table_donor_photos,
     create_table_acceptor_photos,
     create_table_donated_organs,
-    create_table_organs_waiting_queue,
+    create_awaited_organs,
 )

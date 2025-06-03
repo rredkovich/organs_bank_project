@@ -2,8 +2,8 @@ import sqlite3
 
 from db.fixtures import gender_male, organ_heart
 from db.query_service import QueryService
-from db.models import Gender, Organ
-from .fixtures import db_connection, gender_male, organ_heart, organ_kidney_a_negative
+from db.models import Gender, Organ, AwaitedOrgan
+from .fixtures import db_connection, gender_male, organ_heart, organ_kidney_a_negative, acceptor
 
 def test_prepare_dataclass(db_connection, gender_male):
     qs = QueryService(db_connection)
@@ -69,4 +69,24 @@ def test_create(organ_kidney_a_negative, db_connection):
     assert created_organ.id == result["id"]
     assert result["organ_name"] == organ_kidney_a_negative.organ_name
     assert result["blood_type"] == organ_kidney_a_negative.blood_type
+    db_connection.commit()
+
+def test_create_with_fk(acceptor, organ_kidney_a_negative, db_connection):
+    qs = QueryService(db_connection)
+
+    kidney = qs.create(organ_kidney_a_negative)
+    acceptor = qs.create(acceptor)
+
+    awaited_organ = AwaitedOrgan(acceptor.id, kidney.organ_name)
+
+    awaited_organ = qs.create(awaited_organ)
+    assert awaited_organ.id is not None
+
+    cur = db_connection.cursor()
+    cur.execute("SELECT * FROM awaited_organs ORDER BY created_at DESC LIMIT 1")
+    columns = (val[0] for val in cur.description)
+    result = dict(zip(columns, cur.fetchone()))
+
+    assert result["acceptor_id"] == acceptor.id
+    assert result["organ_name"] == organ_kidney_a_negative.organ_name
     db_connection.commit()

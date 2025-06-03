@@ -46,13 +46,13 @@ def prefill_lib_data(conn: sqlite3.Connection):
     """Prefils library data"""
     cur = conn.cursor()
     for gender in genders:
-        cur.execute(f"insert into genders values ('{gender}');")
+        cur.execute(f"insert into genders (gender) values ('{gender}');")
 
     for blood_type in blood_types:
-        cur.execute(f"insert into blood_types values ('{blood_type}');")
+        cur.execute(f"insert into blood_types (blood_type) values ('{blood_type}');")
 
     for organ_name in transplantable_organs:
-        cur.execute(f"insert into organ_names values ('{organ_name}');")
+        cur.execute(f"insert into organ_names (organ_name) values ('{organ_name}');")
 
     conn.commit()
 
