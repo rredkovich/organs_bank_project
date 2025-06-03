@@ -38,12 +38,8 @@ genders = (
 
 def create_tables(conn: sqlite3.Connection):
     cur = conn.cursor()
-    cur.execute(schema.create_table_genders)
-    cur.execute(schema.create_table_blood_types)
-    cur.execute(schema.create_table_organ_names)
-    cur.execute(schema.create_table_organs)
-    cur.execute(schema.create_table_donors)
-    cur.execute(schema.create_table_acceptors)
+    for table in schema.all_tables:
+        cur.execute(table)
     conn.commit()
 
 def prefill_lib_data(conn: sqlite3.Connection):
