@@ -1,9 +1,7 @@
-import sqlite3
-
-from db.fixtures import gender_male, organ_heart
+from tests.fixtures import gender_male, organ_heart
 from db.query_service import QueryService
-from db.models import Gender, Organ, AwaitedOrgan
-from .fixtures import db_connection, gender_male, organ_heart, organ_kidney_a_negative, acceptor
+from db.models import AwaitedOrgan
+from tests.fixtures import db_connection, organ_kidney_a_negative, acceptor
 
 def test_prepare_dataclass(db_connection, gender_male):
     qs = QueryService(db_connection)

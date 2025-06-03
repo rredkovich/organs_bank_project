@@ -63,3 +63,6 @@ class QueryService:
         dc.id = inserted[0]
         self.conn.commit()
         return dc
+
+    def update(self, dc: "BaseDT") -> "BaseDT":
+        """Updates DB record with provided data. Replaces all data in row with it! Except *id columns ofcourse"""

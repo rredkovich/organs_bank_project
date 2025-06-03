@@ -1,6 +1,5 @@
-import pytest
-from .utilities import camel_to_snake, pluralize, class_to_table_name
-from .models import BloodType, Gender
+from db.utilities import camel_to_snake, pluralize, class_to_table_name
+from db.models import BloodType, Gender
 
 def test_camel_to_snake():
     camel = "BloodType"
