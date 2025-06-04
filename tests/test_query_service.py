@@ -143,4 +143,3 @@ def test_fetch_filtered(organ_kidney_a_negative, organ_kidney_b_positive, db_con
     kidneys = qs.fetch_filtered('organ_name', 'kidney', one.__class__)
 
     assert kidneys == [one, two]
-

@@ -98,3 +98,8 @@ class QueryService:
         cursor.execute(stmt, (value, ))
         fetched = cursor.fetchall()
         return [klass(*row) for row in fetched]
+
+    def fetch_all(self, klass: "BaseDT") -> List["BaseDT"]:
+        """Fetches all records from the table which corresponds to the klass.
+        Returns the list of instances of the klass."""
+        ...
