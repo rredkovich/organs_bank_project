@@ -43,7 +43,8 @@ class QueryService:
         value_columns = columns if len(columns) == 1 else columns[1:]
         values = values if len(values) == 1 else values[1:] + (values[0],)
         cols_with_placeholders = ', '.join(f"{column} = ?" for column in value_columns)
-        sql = f"UPDATE {table_name} SET {cols_with_placeholders} WHERE {columns[0]} = ? RETURNING *"
+        cols = [f.name for f in fields(dc)]
+        sql = f"UPDATE {table_name} SET {cols_with_placeholders} WHERE {columns[0]} = ? RETURNING {", ".join(cols)}"
         return sql, values
 
     def _prepare_delete_stmt(self, dc: "BaseDT") -> Tuple[str, Tuple[Any]]:
@@ -73,3 +74,27 @@ class QueryService:
         updated = cursor.fetchone()
         self.conn.commit()
 
+
+    def fetch_one(self, id: int, klass: "BaseDT") -> "BaseDT":
+        """Fetches DB record from a table which corresponds to the klass by provided id,
+        returns the instance of the klass"""
+        table_name = utilities.class_to_table_name(klass.__name__)
+        cols = [f.name for f in fields(klass)]
+
+        stmt = f"SELECT {', '.join(cols)} FROM {table_name} WHERE id = ?"
+
+        cursor = self.conn.cursor()
+        cursor.execute(stmt, (id,))
+        fetched = cursor.fetchone()
+        return klass(*fetched)
+
+    def fetch_filtered(self, filter_field: str, value: Any, klass: "BaseDT") -> List["BaseDT"]:
+        """Fetches DB records from a table which corresponds to the klass by provided field's value,
+        returns the list of instances of the klass."""
+        table_name = utilities.class_to_table_name(klass.__name__)
+        cols = [f.name for f in fields(klass)]
+        stmt = f"SELECT {", ".join(cols)} FROM {table_name} WHERE {filter_field} = ? ORDER BY created_at ASC"
+        cursor = self.conn.cursor()
+        cursor.execute(stmt, (value, ))
+        fetched = cursor.fetchall()
+        return [klass(*row) for row in fetched]

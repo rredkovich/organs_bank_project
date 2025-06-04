@@ -1,7 +1,8 @@
 from tests.fixtures import gender_male, organ_heart
 from db.query_service import QueryService
 from db.models import AwaitedOrgan
-from tests.fixtures import db_connection, organ_kidney_a_negative, acceptor
+from tests.fixtures import db_connection, organ_kidney_a_negative, \
+    organ_kidney_b_positive, acceptor
 
 def test_prepare_dataclass(db_connection, gender_male):
     qs = QueryService(db_connection)
@@ -37,14 +38,15 @@ def test_prepare_update_stmt_one_field(gender_male, db_connection):
     qs = QueryService(db_connection)
 
     sql, values = qs._prepare_update_stmt(gender_male)
-    assert sql == "UPDATE genders SET gender = ? WHERE gender = ? RETURNING *"
+    assert sql == "UPDATE genders SET gender = ? WHERE gender = ? RETURNING gender"
     assert values == ("male",)
 
 def test_prepare_update_stmt_many_fields_lib_table(organ_heart, db_connection):
     qs = QueryService(db_connection)
 
     sql, values = qs._prepare_update_stmt(organ_heart)
-    assert sql == "UPDATE organs SET organ_name = ?, blood_type = ? WHERE id = ? RETURNING *"
+    assert sql == ("UPDATE organs SET organ_name = ?, blood_type = ? WHERE id = ? "
+                   "RETURNING id, organ_name, blood_type")
     assert values == ("heart", "A+", 1)
 
 def test_prepare_delete_stmt(organ_heart, db_connection):
@@ -111,3 +113,34 @@ def test_update(organ_kidney_a_negative, db_connection):
     assert result["organ_name"] == organ_kidney_a_negative.organ_name
     assert result["blood_type"] == "B+"
     db_connection.commit()
+
+def test_delete(organ_kidney_a_negative, db_connection):
+    # TODO: allow deletion only from general tables, not library ones
+    pass
+
+def test_fetch_one(organ_kidney_a_negative, db_connection):
+    qc = QueryService(db_connection)
+
+    created = qc.create(organ_kidney_a_negative)
+    assert created.id is not None
+
+    fetched = qc.fetch_one(created.id, organ_kidney_a_negative.__class__)
+    assert fetched.id == created.id
+    assert fetched.organ_name == organ_kidney_a_negative.organ_name
+    assert fetched.blood_type == organ_kidney_a_negative.blood_type
+
+def test_fetch_filtered(organ_kidney_a_negative, organ_kidney_b_positive, db_connection):
+    cur = db_connection.cursor()
+
+    # erasing previous test data
+    cur.execute("DELETE FROM organs")
+    db_connection.commit()
+
+    qs = QueryService(db_connection)
+    one = qs.create(organ_kidney_a_negative)
+    two = qs.create(organ_kidney_b_positive)
+
+    kidneys = qs.fetch_filtered('organ_name', 'kidney', one.__class__)
+
+    assert kidneys == [one, two]
+

@@ -47,6 +47,14 @@ def organ_kidney_a_negative():
         blood_type="A-"
     )
 
+@pytest.fixture
+def organ_kidney_b_positive():
+    return Organ(
+        id=2,
+        organ_name="kidney",
+        blood_type="B+"
+    )
+
 # # TODO: fixture reuse don't work here!
 # @pytest.fixture
 # def organ_kidney_a_negative(blood_type_a_negative):
