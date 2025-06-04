@@ -45,6 +45,7 @@ def test_prepare_update_stmt_many_fields_lib_table(organ_heart, db_connection):
 
     sql, values = qs._prepare_update_stmt(organ_heart)
     assert sql == "UPDATE organs SET organ_name = ?, blood_type = ? WHERE id = ? RETURNING *"
+    assert values == ("heart", "A+", 1)
 
 def test_prepare_delete_stmt(organ_heart, db_connection):
     qs = QueryService(db_connection)
@@ -87,4 +88,26 @@ def test_create_with_fk(acceptor, organ_kidney_a_negative, db_connection):
 
     assert result["acceptor_id"] == acceptor.id
     assert result["organ_name"] == organ_kidney_a_negative.organ_name
+    db_connection.commit()
+
+def test_update(organ_kidney_a_negative, db_connection):
+    qs = QueryService(db_connection)
+
+    created_organ = qs.create(organ_kidney_a_negative)
+
+    assert created_organ.id is not None
+
+    created_organ.blood_type = 'B+'
+
+    qs.update(created_organ)
+
+    # assert awaited_organ.id is not None
+
+    cur = db_connection.cursor()
+    cur.execute("SELECT * FROM organs where id = ?", (created_organ.id,))
+    columns = (val[0] for val in cur.description)
+    result = dict(zip(columns, cur.fetchone()))
+
+    assert result["organ_name"] == organ_kidney_a_negative.organ_name
+    assert result["blood_type"] == "B+"
     db_connection.commit()

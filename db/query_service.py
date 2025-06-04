@@ -41,6 +41,7 @@ class QueryService:
         # where text value is also PK
         table_name, columns, values = self._prepare_dataclass(dc)
         value_columns = columns if len(columns) == 1 else columns[1:]
+        values = values if len(values) == 1 else values[1:] + (values[0],)
         cols_with_placeholders = ', '.join(f"{column} = ?" for column in value_columns)
         sql = f"UPDATE {table_name} SET {cols_with_placeholders} WHERE {columns[0]} = ? RETURNING *"
         return sql, values
@@ -65,4 +66,10 @@ class QueryService:
         return dc
 
     def update(self, dc: "BaseDT") -> "BaseDT":
-        """Updates DB record with provided data. Replaces all data in row with it! Except *id columns ofcourse"""
+        """Updates DB record with provided data. Replaces all data in row with it! Except *id columns of course"""
+        stmt, values = self._prepare_update_stmt(dc)
+        cursor = self.conn.cursor()
+        cursor.execute(stmt, values)
+        updated = cursor.fetchone()
+        self.conn.commit()
+
