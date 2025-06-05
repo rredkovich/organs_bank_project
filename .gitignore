@@ -1,3 +1,4 @@
 .idea
 .venv
+*.db
 tk_table.py.BAK
