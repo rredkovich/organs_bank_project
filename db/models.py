@@ -19,13 +19,13 @@ class OrganName:
 
 @dataclass
 class Organ:
-    id: int
+    organ_id: int
     organ_name: str
     blood_type: str
 
 @dataclass
 class Donor:
-    id: int
+    donor_id: int
     name: str
     registration_date: datetime
     birthdate: datetime
@@ -40,7 +40,7 @@ class Donor:
 
 @dataclass
 class Acceptor:
-    id: int
+    acceptor_id: int
     name: str
     registration_date: datetime
     birthdate: datetime

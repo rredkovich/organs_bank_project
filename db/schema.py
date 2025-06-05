@@ -21,7 +21,7 @@ CREATE TABLE organ_names (
 
 create_table_organs = """
 CREATE TABLE organs (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    organ_id         INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     organ_name TEXT NOT NULL,
     blood_type TEXT NOT NULL,
     created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,

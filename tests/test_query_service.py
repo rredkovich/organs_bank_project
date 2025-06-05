@@ -17,8 +17,8 @@ def test_prepare_dataclass_many_fields(db_connection, organ_heart):
     qs = QueryService(db_connection)
     t_name, cols, vals = qs._prepare_dataclass(organ_heart)
     assert t_name == "organs"
-    assert cols == ("id", "organ_name", "blood_type",)
-    assert vals == (organ_heart.id, organ_heart.organ_name, organ_heart.blood_type,)
+    assert cols == ("organ_id", "organ_name", "blood_type",)
+    assert vals == (organ_heart.organ_id, organ_heart.organ_name, organ_heart.blood_type,)
 
 
 def test_prepare_insert_stmt(db_connection, gender_male):
@@ -45,29 +45,28 @@ def test_prepare_update_stmt_many_fields_lib_table(organ_heart, db_connection):
     qs = QueryService(db_connection)
 
     sql, values = qs._prepare_update_stmt(organ_heart)
-    assert sql == ("UPDATE organs SET organ_name = ?, blood_type = ? WHERE id = ? "
-                   "RETURNING id, organ_name, blood_type")
+    assert sql == ("UPDATE organs SET organ_name = ?, blood_type = ? WHERE organ_id = ? "
+                   "RETURNING organ_id, organ_name, blood_type")
     assert values == ("heart", "A+", 1)
 
 def test_prepare_delete_stmt(organ_heart, db_connection):
     qs = QueryService(db_connection)
     sql, values = qs._prepare_delete_stmt(organ_heart)
-    assert sql == "DELETE FROM organs WHERE id = ?"
-    assert values == (organ_heart.id,)
+    assert sql == "DELETE FROM organs WHERE organ_id = ?"
+    assert values == (organ_heart.organ_id,)
 
 def test_create(organ_kidney_a_negative, db_connection):
     qs = QueryService(db_connection)
 
     created_organ = qs.create(organ_kidney_a_negative)
 
-    assert created_organ.id is not None
+    assert created_organ.organ_id is not None
 
     cur = db_connection.cursor()
-    cur.execute("SELECT * FROM organs ORDER BY id DESC LIMIT 1")
+    cur.execute("SELECT * FROM organs ORDER BY organ_id DESC LIMIT 1")
     columns = (val[0] for val in cur.description)
     result = dict(zip(columns, cur.fetchone()))
-    assert result["id"] == 1
-    assert created_organ.id == result["id"]
+    assert result["organ_id"] == created_organ.organ_id
     assert result["organ_name"] == organ_kidney_a_negative.organ_name
     assert result["blood_type"] == organ_kidney_a_negative.blood_type
     db_connection.commit()
@@ -78,17 +77,17 @@ def test_create_with_fk(acceptor, organ_kidney_a_negative, db_connection):
     kidney = qs.create(organ_kidney_a_negative)
     acceptor = qs.create(acceptor)
 
-    awaited_organ = AwaitedOrgan(acceptor.id, kidney.organ_name)
+    awaited_organ = AwaitedOrgan(acceptor.acceptor_id, kidney.organ_name)
 
     awaited_organ = qs.create(awaited_organ)
-    assert awaited_organ.id is not None
+    assert awaited_organ.acceptor_id == acceptor.acceptor_id
 
     cur = db_connection.cursor()
     cur.execute("SELECT * FROM awaited_organs ORDER BY created_at DESC LIMIT 1")
     columns = (val[0] for val in cur.description)
     result = dict(zip(columns, cur.fetchone()))
 
-    assert result["acceptor_id"] == acceptor.id
+    assert result["acceptor_id"] == acceptor.acceptor_id
     assert result["organ_name"] == organ_kidney_a_negative.organ_name
     db_connection.commit()
 
@@ -97,7 +96,7 @@ def test_update(organ_kidney_a_negative, db_connection):
 
     created_organ = qs.create(organ_kidney_a_negative)
 
-    assert created_organ.id is not None
+    assert created_organ.organ_id is not None
 
     created_organ.blood_type = 'B+'
 
@@ -106,7 +105,7 @@ def test_update(organ_kidney_a_negative, db_connection):
     # assert awaited_organ.id is not None
 
     cur = db_connection.cursor()
-    cur.execute("SELECT * FROM organs where id = ?", (created_organ.id,))
+    cur.execute("SELECT * FROM organs where organ_id = ?", (created_organ.organ_id,))
     columns = (val[0] for val in cur.description)
     result = dict(zip(columns, cur.fetchone()))
 
@@ -122,10 +121,10 @@ def test_fetch_one(organ_kidney_a_negative, db_connection):
     qc = QueryService(db_connection)
 
     created = qc.create(organ_kidney_a_negative)
-    assert created.id is not None
+    assert created.organ_id is not None
 
-    fetched = qc.fetch_one(created.id, organ_kidney_a_negative.__class__)
-    assert fetched.id == created.id
+    fetched = qc.fetch_one(created.organ_id, organ_kidney_a_negative.__class__)
+    assert fetched.organ_id == created.organ_id
     assert fetched.organ_name == organ_kidney_a_negative.organ_name
     assert fetched.blood_type == organ_kidney_a_negative.blood_type
 

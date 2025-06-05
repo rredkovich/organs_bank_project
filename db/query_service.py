@@ -5,6 +5,9 @@ import sqlite3
 from . import utilities
 from dataclasses import fields
 from typing import List, Tuple, Any
+# TODO: put primary_key_by_class utility function to other module and move its call from query service? possible leaking
+# abstraction to call it from here
+from db.utilities import primary_key_by_class
 
 
 class QueryService:
@@ -28,8 +31,9 @@ class QueryService:
     def _prepare_insert_stmt(self, dc: "BaseDT") -> Tuple[str, Tuple[Any]]:
         """Creates INSERT SQL statement, returns the statement and values"""
         table_name, columns, values = self._prepare_dataclass(dc)
-        # As we rely on autocreated by DB IDs dropping the first col/val if it's 'id'
-        if columns[0] == 'id':
+
+        # As we rely on autocreated by DB IDs dropping the first col/val if it's entity 'id'
+        if columns[0] == primary_key_by_class(dc.__class__):
             columns, values = columns[1:], values[1:]
         placeholders = ', '.join('?' for _ in values)
         sql = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders}) RETURNING *"
@@ -50,8 +54,8 @@ class QueryService:
     def _prepare_delete_stmt(self, dc: "BaseDT") -> Tuple[str, Tuple[Any]]:
         """Creates DELETE SQL statement, returns the statement and values"""
         table_name, columns, values = self._prepare_dataclass(dc)
-        if not columns[0].endswith('id'):
-            raise ValueError("Attempt to delete non-id column, are you trying to remove library value?..")
+        if columns[0] != primary_key_by_class(dc.__class__):
+            raise ValueError("Attempt to delete non-pk column, are you trying to remove library value?..")
         sql = f"DELETE FROM {table_name} WHERE {columns[0]} = ?"
         return sql, (values[0],)
 
@@ -61,8 +65,9 @@ class QueryService:
         cursor = self.conn.cursor()
         cursor.execute(stmt, values)
         inserted = cursor.fetchone()
+        cols = [f.name for f in fields(dc) if f.name.endswith("_id")]
 
-        dc.id = inserted[0]
+        setattr(dc, cols[0], inserted[0])
         self.conn.commit()
         return dc
 
@@ -80,8 +85,9 @@ class QueryService:
         returns the instance of the klass"""
         table_name = utilities.class_to_table_name(klass.__name__)
         cols = [f.name for f in fields(klass)]
+        pk_col = primary_key_by_class(klass)
 
-        stmt = f"SELECT {', '.join(cols)} FROM {table_name} WHERE id = ?"
+        stmt = f"SELECT {', '.join(cols)} FROM {table_name} WHERE {pk_col} = ?"
 
         cursor = self.conn.cursor()
         cursor.execute(stmt, (id,))
@@ -102,4 +108,11 @@ class QueryService:
     def fetch_all(self, klass: "BaseDT") -> List["BaseDT"]:
         """Fetches all records from the table which corresponds to the klass.
         Returns the list of instances of the klass."""
-        ...
+        table_name = utilities.class_to_table_name(klass.__name__)
+        cols = [f.name for f in fields(klass)]
+        stmt = f"SELECT {", ".join(cols)} FROM {table_name} ORDER BY created_at ASC"
+        cursor = self.conn.cursor()
+        cursor.execute(stmt)
+        fetched = cursor.fetchall()
+        objs = [klass(*row) for row in fetched]
+        return objs

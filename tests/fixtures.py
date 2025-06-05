@@ -33,7 +33,7 @@ def blood_type_a_negative():
 @pytest.fixture
 def organ_heart():
     return Organ(
-        id=1,
+        organ_id=1,
         organ_name="heart",
         blood_type="A+",
     )
@@ -42,7 +42,7 @@ def organ_heart():
 @pytest.fixture
 def organ_kidney_a_negative():
     return Organ(
-        id=2,
+        organ_id=2,
         organ_name="kidney",
         blood_type="A-"
     )
@@ -50,7 +50,7 @@ def organ_kidney_a_negative():
 @pytest.fixture
 def organ_kidney_b_positive():
     return Organ(
-        id=2,
+        organ_id=2,
         organ_name="kidney",
         blood_type="B+"
     )
@@ -67,7 +67,7 @@ def organ_kidney_b_positive():
 @pytest.fixture
 def acceptor():
     return Acceptor(
-        id=None,
+        acceptor_id=None,
         name='Lina Doe',
         registration_date=datetime.now().date(),
         birthdate=date(1970, 1, 12),

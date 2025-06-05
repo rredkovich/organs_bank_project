@@ -17,3 +17,6 @@ def pluralize(name: str) -> str:
 def class_to_table_name(cls_name: str) -> str:
     snake = camel_to_snake(cls_name)
     return pluralize(snake)
+
+def primary_key_by_class(kls: "BaseDT") -> str:
+    return f"{camel_to_snake(kls.__name__)}_id"
