@@ -4,6 +4,7 @@ from tkinter import ttk
 from db import initialise_db
 from db.query_service import QueryService
 from db import models
+from dataclasses import fields
 
 db_name = 'dev.db'
 
@@ -47,14 +48,21 @@ class Demo(App):
 
         tree = ttk.Treeview(self.root)
         tree.grid()
-        for i in range(n):
-            tree.insert('','end', text=table[i][0], values=table[i][1:])
+        cols = tuple(f.name for f in fields(acceptors[0]))
+        for acceptor in acceptors:
+            values = tuple(getattr(acceptor, col) for col in cols)
+            tree.insert('','end', values=values)
         #
-        tree['columns'] = list(range(m-1))
-        headings=list('ABCDEFGHI')
-        for j in range(m-1):
-            tree.column(j, width=50, anchor='e')
-            tree.heading(j, text=headings[j])
+        tree['columns'] = cols
+        # headings=list('ABCDEFGHI')
+        # for j in range(len(cols)):
+        def cal_width(col_name, col_value):
+            widest = max((col_name, col_value, ), key=lambda x: len(str(x)))
+            return round(len(str(widest)) * 10 + len(str(widest)) * 0.45)
+
+        for i, col in enumerate(cols):
+            tree.column(i, width=cal_width(col, values[i]), anchor='e')
+            tree.heading(i, text=col)
 
 
 if __name__ == '__main__':
