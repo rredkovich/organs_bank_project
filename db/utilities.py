@@ -1,4 +1,6 @@
 import re
+from dataclasses import fields
+from typing import Tuple
 
 def camel_to_snake(name: str) -> str:
     # Convert CamelCase to snake_case
@@ -20,3 +22,6 @@ def class_to_table_name(cls_name: str) -> str:
 
 def primary_key_by_class(kls: "BaseDT") -> str:
     return f"{camel_to_snake(kls.__name__)}_id"
+
+def data_class_fields_names(kls: "BaseDT") -> Tuple[str]:
+    return tuple(f.name for f in fields(kls))

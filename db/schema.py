@@ -34,7 +34,7 @@ create_table_donors = """
 CREATE TABLE donors (
     donor_id            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     name                TEXT      NOT NULL,
-    registration_date  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
+    registration_date   DATETIME  NOT NULL default CURRENT_TIMESTAMP,
     birthdate           DATETIME  NOT NULL,
     blood_type          TEXT      NOT NULL,
     possible_extraction DATETIME  NOT NULL,

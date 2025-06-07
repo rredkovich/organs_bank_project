@@ -1,21 +1,37 @@
 import tkinter as tk
-from tkinter import ttk
-from db.query_service import QueryService
-from db import models
 from dataclasses import fields
 from typing import List
+from tkinter import ttk
+
+from app.controllers.acceptor_controller import AcceptorController
+from db import models
+
 
 class App:
-    """Define the application class."""
-    def __init__(self, db_connection):
-        self.qs = QueryService(db_connection)
+    def __init__(self):
         self.root = tk.Tk()
-        # self.label = tk.Label(self.root, text='hello world!', font='Arial 24')
-        # self.label.grid()
+        self.root.title("Organs Bank")
+        notebook = ttk.Notebook(self.root)
+        notebook.pack(fill="both", expand=True)
+
+        acceptor_tab = ttk.Frame(notebook)
+        notebook.add(acceptor_tab, text="Acceptors")
+        AcceptorController(acceptor_tab)
 
     def run(self):
-        """Run the main loop."""
         self.root.mainloop()
+
+# class App:
+#     """Define the application class."""
+#     def __init__(self, db_connection):
+#         self.qs = QueryService(db_connection)
+#         self.root = tk.Tk()
+#         # self.label = tk.Label(self.root, text='hello world!', font='Arial 24')
+#         # self.label.grid()
+#
+#     def run(self):
+#         """Run the main loop."""
+#         self.root.mainloop()
 
 
 class Demo(App):

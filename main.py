@@ -1,6 +1,7 @@
 import sqlite3
-from app.app import Demo
+from app.app import App
 from db import initialise_db
+from settings import db_connection
 
 def initialise_from_scratch(conn):
     initialise_db.create_tables(conn)
@@ -8,9 +9,6 @@ def initialise_from_scratch(conn):
 
 
 if __name__ == '__main__':
-    db_name = 'dev.db'
-    conn = sqlite3.connect(db_name)
-    conn.execute("PRAGMA foreign_keys = ON")
-
-    app = Demo(conn)
+    # initialise_from_scratch(db_connection)
+    app = App()
     app.run()
