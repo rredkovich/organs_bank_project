@@ -74,7 +74,7 @@ CREATE TABLE donor_photos (
     donor_id            INTEGER NOT NULL, 
     photo BINARY NOT NULL,
     created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
-    FOREIGN KEY (donor_id) REFERENCES donors(donor_id)
+    FOREIGN KEY (donor_id) REFERENCES donors(donor_id) ON DELETE CASCADE 
 );"""
 
 create_table_acceptor_photos = """
@@ -82,7 +82,7 @@ CREATE TABLE acceptor_photos (
     acceptor_id  INTEGER NOT NULL, 
     photo BINARY NOT NULL,
     created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
-    FOREIGN KEY (acceptor_id) REFERENCES acceptors(acceptor_id)
+    FOREIGN KEY (acceptor_id) REFERENCES acceptors(acceptor_id) ON DELETE CASCADE 
 );
 """
 
@@ -93,7 +93,7 @@ CREATE TABLE donated_organs (
     extraction_ts DATETIME NOT NULL,
     expiration_ts DATETIME,
     created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
-    FOREIGN KEY (donor_id) REFERENCES donors(donor_id),
+    FOREIGN KEY (donor_id) REFERENCES donors(donor_id) ON DELETE CASCADE,
     FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name) ON UPDATE CASCADE
 );"""
 
@@ -102,7 +102,7 @@ CREATE TABLE awaited_organs (
     acceptor_id INTEGER NOT NULL,
     organ_name TEXT,
     created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
-    FOREIGN KEY (acceptor_id) REFERENCES acceptors(acceptor_id),
+    FOREIGN KEY (acceptor_id) REFERENCES acceptors(acceptor_id) ON DELETE CASCADE,
     FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name) ON UPDATE CASCADE
 );"""
 

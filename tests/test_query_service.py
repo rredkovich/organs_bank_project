@@ -1,8 +1,6 @@
-from tests.fixtures import gender_male, organ_heart
 from db.query_service import QueryService
 from db.models import AwaitedOrgan
-from tests.fixtures import db_connection, organ_kidney_a_negative, \
-    organ_kidney_b_positive, acceptor
+from fixtures import *
 
 
 def test_prepare_dataclass(db_connection, gender_male):
@@ -154,6 +152,37 @@ def test_fetch_filtered(organ_kidney_a_negative, organ_kidney_b_positive, db_con
 
     assert kidneys == [one, two]
 
+def test_add_photo(acceptor, acceptor_photo, db_connection):
+    """Testing to be sure that bytes are stored as intended"""
+    qs = QueryService(db_connection)
 
-def test_fetch_all():
-    assert False
+    acceptor = qs.create(acceptor)
+    acceptor_photo.acceptor_id = acceptor.acceptor_id
+
+    saved_photo = qs.create(acceptor_photo)
+
+    stmt = "select * from acceptor_photos where acceptor_id = ?"
+    cur = db_connection.cursor()
+    cur.execute(stmt, (acceptor.acceptor_id, ))
+    data = cur.fetchone()
+
+    assert data[1] == acceptor_photo.photo
+
+def test_fetch_all(db_connection, acceptor1, acceptor2, acceptor3):
+    cur = db_connection.cursor()
+
+    # erasing previous test data
+    data = cur.execute("DELETE FROM acceptors")
+    db_connection.commit()
+
+    qs = QueryService(db_connection)
+
+    one = qs.create(acceptor1)
+    three = qs.create(acceptor3)
+    two = qs.create(acceptor2)
+
+    all_accs = qs.fetch_all(one.__class__)
+
+    assert all_accs == [one, three, two]
+
+
