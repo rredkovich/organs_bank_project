@@ -1,6 +1,6 @@
 import io, datetime
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog, messagebox
 from typing import List, Any
 
 
@@ -35,9 +35,9 @@ class BaseAppListView(ttk.Frame):
 
 
     def _on_double_click(self, event):
-        item = self.tree.identify_row(event.y)
-        if item and self.double_click_callback:
-            self.double_click_callback(item.iid)
+        item_id = self.tree.identify_row(event.y)
+        if item_id and self.double_click_callback:
+            self.double_click_callback(int(item_id))
 
     def populate(self, valuess: List[List[Any]], id_index: int):
         """Populates table with provided values, uses values[id_index] as id
@@ -53,8 +53,8 @@ class BaseAppListView(ttk.Frame):
 
 class PersonBaseDetailAppView(tk.Toplevel):
     # TODO: Organs are different for donor and acceptor, should be moved to a mixin?..
-    #def __init__(self, parent, person, photo, organs, on_save):
-    def __init__(self, parent, person, labels, values, photo, on_save=None):
+    def __init__(self, parent, person, photo, organs, on_save):
+    # def __init__(self, parent, person, labels, values, photo, on_save=None):
         super().__init__(parent)
         self.person = person
         self.on_save = on_save
@@ -65,21 +65,13 @@ class PersonBaseDetailAppView(tk.Toplevel):
         for i, field in enumerate(fields):
             ttk.Label(self, text=field.capitalize()).grid(row=i, column=0, sticky='e')
             entry = ttk.Entry(self)
-            entry.insert(0, str(getattr(acceptor, field) or ""))
+            entry.insert(0, str(getattr(self.person, field) or ""))
             entry.grid(row=i, column=1)
             self.entries[field] = entry
 
-        # # Organs
-        # self.organ_listbox = tk.Listbox(self)
-        # self.organ_listbox.grid(row=0, column=2, rowspan=6)
-        # for o in organs:
-        #     self.organ_listbox.insert(tk.END, o.organ_name)
-        # ttk.Button(self, text="Add Organ", command=self.add_organ).grid(row=6, column=2)
-        # ttk.Button(self, text="Remove Selected", command=self.remove_organ).grid(row=7, column=2)
-
         # Image preview
-        self.image_label = ttk.Label(self)
-        self.image_label.grid(row=8, column=2)
+        self.image_label = ttk.Label(self, width=40)
+        self.image_label.grid(row=0, column=2, rowspan=len(fields))
         self.photo_data = photo.photo if photo else None
         if self.photo_data:
             self.show_image()
@@ -97,7 +89,7 @@ class PersonBaseDetailAppView(tk.Toplevel):
     #         self.organ_listbox.delete(i)
 
     def upload_photo(self):
-        path = ttk.filedialog.askopenfilename(filetypes=[("Images", "*.jpg *.png")])
+        path = filedialog.askopenfilename(filetypes=[("Images", "*.png")])
         if path:
             with open(path, 'rb') as f:
                 self.photo_data = f.read()
@@ -105,12 +97,11 @@ class PersonBaseDetailAppView(tk.Toplevel):
 
     def show_image(self):
         try:
-            image = ttk.Image.open(io.BytesIO(self.photo_data))
-            image.thumbnail((100, 100))
-            self.tk_image = ttk.ImageTk.PhotoImage(image)
-            self.image_label.configure(image=self.tk_image)
+            self.tk_image = tk.PhotoImage(data=self.photo_data)
+            self.image_label.configure(image=self.tk_image) #, width=100, height=100)
+            self.image_label.image = self.tk_image
         except Exception as e:
-            ttk.messagebox.showerror("Error", f"Invalid image: {e}")
+            messagebox.showerror("Error", f"Invalid image: {e}")
 
     def save(self):
         try:
@@ -127,4 +118,4 @@ class PersonBaseDetailAppView(tk.Toplevel):
             self.on_save(self.person, self.photo_data, organs)
             self.destroy()
         except Exception as e:
-            ttk.messagebox.showerror("Validation Error", str(e))
+            messagebox.showerror("Validation Error", str(e))
