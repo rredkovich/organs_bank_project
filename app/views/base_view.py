@@ -1,4 +1,4 @@
-import io, datetime
+import datetime
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from typing import List, Any
@@ -33,7 +33,6 @@ class BaseAppListView(ttk.Frame):
         """Registers callback for item click. Calls with item ID, which is first element in column by default"""
         self.double_click_callback = callback
 
-
     def _on_double_click(self, event):
         item_id = self.tree.identify_row(event.y)
         if item_id and self.double_click_callback:
@@ -53,7 +52,7 @@ class BaseAppListView(ttk.Frame):
 
 class PersonBaseDetailAppView(tk.Toplevel):
     # TODO: Organs are different for donor and acceptor, should be moved to a mixin?..
-    def __init__(self, parent, person, photo, organs, on_save):
+    def __init__(self, parent, person, photo, on_save):
     # def __init__(self, parent, person, labels, values, photo, on_save=None):
         super().__init__(parent)
         self.person = person
@@ -63,30 +62,21 @@ class PersonBaseDetailAppView(tk.Toplevel):
         self.entries = {}
         fields = ["name", "birthdate", "blood_type", "gender", "height", "weight", "phone", "address", "notes"]
         for i, field in enumerate(fields):
-            ttk.Label(self, text=field.capitalize()).grid(row=i, column=0, sticky='e')
+            ttk.Label(self, text=field.capitalize()).grid(row=i, column=1, sticky='e')
             entry = ttk.Entry(self)
             entry.insert(0, str(getattr(self.person, field) or ""))
-            entry.grid(row=i, column=1)
+            entry.grid(row=i, column=2)
             self.entries[field] = entry
 
         # Image preview
         self.image_label = ttk.Label(self, width=40)
-        self.image_label.grid(row=0, column=2, rowspan=len(fields))
+        self.image_label.grid(row=0, column=0, rowspan=len(fields))
         self.photo_data = photo.photo if photo else None
         if self.photo_data:
             self.show_image()
-        ttk.Button(self, text="Upload Photo", command=self.upload_photo).grid(row=9, column=2)
+        ttk.Button(self, text="Upload Photo", command=self.upload_photo).grid(row=9, column=0)
 
-        ttk.Button(self, text="Save", command=self.save).grid(row=10, column=1)
-
-    # def add_organ(self):
-    #     name = tk.simpledialog.askstring("Organ", "Enter organ name:")
-    #     if name:
-    #         self.organ_listbox.insert(tk.END, name)
-
-    # def remove_organ(self):
-    #     for i in reversed(self.organ_listbox.curselection()):
-    #         self.organ_listbox.delete(i)
+        ttk.Button(self, text="Save", command=self.save).grid(row=10, column=2)
 
     def upload_photo(self):
         path = filedialog.askopenfilename(filetypes=[("Images", "*.png")])
@@ -114,9 +104,24 @@ class PersonBaseDetailAppView(tk.Toplevel):
             self.person.phone = self.entries["phone"].get()
             self.person.address = self.entries["address"].get()
             self.person.notes = self.entries["notes"].get()
-            # organs = list(self.organ_listbox.get(0, tk.END))
-            organs = []
+            organs = list(self.organ_listbox.get(0, tk.END))
             self.on_save(self.person, self.photo_data, organs)
             self.destroy()
         except Exception as e:
             messagebox.showerror("Validation Error", str(e))
+
+
+class ChoiceDialog(tk.simpledialog.Dialog):
+    def __init__(self, parent, values: List[str], title='Choose an option'):
+        self.options = values
+        self.result = None
+        super().__init__(parent, title)
+
+    def body(self, master):
+        self.combo = ttk.Combobox(master, values=self.options, state='readonly')
+        self.combo.grid(row=0, column=0)
+        self.combo.current(0)
+        return self.combo  # initial focus
+
+    def apply(self):
+        self.result = self.combo.get()  # store chosen value

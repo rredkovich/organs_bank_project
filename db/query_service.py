@@ -97,6 +97,13 @@ class QueryService:
     def update_or_create(self, dc: "BaseDT"):
         return self.update(dc) or self.create(dc)
 
+    def delete_fitered(self, dc, field, value):
+        table_name = utilities.class_to_table_name(dc.__name__)
+        stmt = f"DELETE FROM {table_name} WHERE {field} = ?"
+        cursor = self.conn.cursor()
+        cursor.execute(stmt, (value,))
+        self.conn.commit()
+
     def fetch_one(self, id: int, klass: "BaseDT") -> "BaseDT":
         """Fetches DB record from a table which corresponds to the klass by provided id,
         returns the instance of the klass"""

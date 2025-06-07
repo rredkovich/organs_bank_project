@@ -22,7 +22,7 @@ class AcceptorController:
 
     def open_detail(self, acceptor_id):
         acceptor, photo, organs = self.model.get_details(acceptor_id)
-        AcceptorAppDetailsView(self.view, acceptor, photo, organs, self.save)
+        AcceptorAppDetailsView(self.view, acceptor, photo, self.save, organs=organs, choices=self.model.possible_choices)
 
     def save(self, acceptor, photo, organs):
         self.model.save(acceptor, photo, organs)
