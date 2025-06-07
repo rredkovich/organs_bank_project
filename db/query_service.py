@@ -2,6 +2,8 @@
 CRUD Operations
 """
 import sqlite3
+# from collections import namedtuple
+# from enum import StrEnum
 from datetime import datetime
 from . import utilities
 from dataclasses import fields
@@ -10,6 +12,10 @@ from typing import List, Tuple, Any
 # abstraction to call it from here
 from db.utilities import primary_key_by_class
 
+
+# If have time, going to add order in fetch_all / fetch_filtered
+# OrderedBy = namedtuple("Order", ["field_name order_value"])
+# Order = StrEnum("ASC", "DESC")
 
 class QueryService:
     def __init__(self, conn: sqlite3.Connection):
