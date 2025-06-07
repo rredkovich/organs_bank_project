@@ -38,24 +38,17 @@ class Demo(App):
         self.title.grid(row=1, column=0)
         acceptors = self.qs.fetch_all(models.Acceptor)
 
-        # choice = tk.StringVar()
-        # days = 'Monday', 'Tuesday', 'Friday', 'Saturday', 'Sunday'
-        # combo=Combobox(master=self.root, values=days, textvariable=choice)#.grid(row=2, column=0)
-        # combo.add_cmd(prt)
-        # combo.grid(row=2, column=0)
-
-
-
         tree = ttk.Treeview(self.root)
-        tree.grid()
+        scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=tree.yview)
+        tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar.grid(row=3, column=1, sticky='ns')
+        tree.grid(row=3, column=0)
         cols = tuple(f.name for f in fields(acceptors[0]))
         for acceptor in acceptors:
             values = tuple(getattr(acceptor, col) for col in cols)
             tree.insert('','end', values=values)
-        #
+
         tree['columns'] = cols
-        # headings=list('ABCDEFGHI')
-        # for j in range(len(cols)):
         def cal_width(col_name, col_value):
             widest = max((col_name, col_value, ), key=lambda x: len(str(x)))
             return round(len(str(widest)) * 10 + len(str(widest)) * 0.45)
