@@ -1,10 +1,11 @@
 import sqlite3
 import tkinter as tk
 from tkinter import ttk
-from db import initialise_db
 from db.query_service import QueryService
 from db import models
 from dataclasses import fields
+from typing import List
+# from db import initialise_db
 
 db_name = 'dev.db'
 
@@ -12,8 +13,6 @@ conn = sqlite3.connect(db_name)
 
 # initialise_db.create_tables(conn)
 # initialise_db.prefill_lib_data(conn)
-
-
 
 
 class App:
@@ -32,20 +31,41 @@ class App:
 class Demo(App):
     def __init__(self):
         super().__init__()
+        acceptors = self.qs.fetch_all(models.Acceptor)
+        self.display_table(acceptors, title="Acceptors", on_row_selected=self.on_row_selected)
+
+    def on_row_selected(self, event):
+        tree = event.widget  # This is the Treeview
+        selected_item = tree.selection()
+        if not selected_item:
+            return
+
+        item_id = selected_item[0]
+
+        values = self.tree.item(item_id, "values")
+
+        # Create a new top-level window
+        top = tk.Toplevel(self.root)
+        top.title(f"Details for Acceptor {values[0]}")
+        for i, value in enumerate(values):
+            label = ttk.Label(top, text=f"{self.tree['columns'][i]}: {value}")
+            label.pack(anchor='w', padx=10, pady=5)
+
+    def display_table(self, entities=List["BaseDT"], title="", on_row_selected=None):
         self.main_title = tk.Label(self.root, text='Display a 2D table', font='Arial 24')
         self.title = tk.Label(self.root, text='Click on header to sort')
         self.main_title.grid(row=0, column=0)
         self.title.grid(row=1, column=0)
-        acceptors = self.qs.fetch_all(models.Acceptor)
 
         tree = ttk.Treeview(self.root)
+        self.tree = tree
         scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=tree.yview)
         tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.grid(row=3, column=1, sticky='ns')
         tree.grid(row=3, column=0)
-        cols = tuple(f.name for f in fields(acceptors[0]))
-        for acceptor in acceptors:
-            values = tuple(getattr(acceptor, col) for col in cols)
+        cols = tuple(f.name for f in fields(entities[0]))
+        for entity in entities:
+            values = tuple(getattr(entity, col) for col in cols)
             tree.insert('','end', values=values)
 
         tree['columns'] = cols
@@ -56,6 +76,10 @@ class Demo(App):
         for i, col in enumerate(cols):
             tree.column(i, width=cal_width(col, values[i]), anchor='e')
             tree.heading(i, text=col)
+
+        if on_row_selected:
+            tree.bind("<Double-1>", self.on_row_selected)
+
 
 
 if __name__ == '__main__':

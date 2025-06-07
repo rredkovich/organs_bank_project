@@ -79,7 +79,6 @@ class QueryService:
         updated = cursor.fetchone()
         self.conn.commit()
 
-
     def fetch_one(self, id: int, klass: "BaseDT") -> "BaseDT":
         """Fetches DB record from a table which corresponds to the klass by provided id,
         returns the instance of the klass"""
