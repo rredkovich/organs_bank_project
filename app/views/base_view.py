@@ -6,22 +6,21 @@ from typing import List, Any
 
 class BaseAppListView(ttk.Frame):
     def __init__(self, parent, controller, columns: List[str], double_click_callback=None):
-        super().__init__(master=parent)
+        super().__init__(parent)
+        self.table_columns = columns
         self.double_click_callback = double_click_callback
         self.controller = controller
-        # headings?
-        #self.tree = ttk.Treeview(master=self, headinds=columns, show="headings")
-        self.tree = ttk.Treeview(master=parent, show="headings")
+        self.tree = ttk.Treeview(parent, show="headings")
 
         scrollbar = ttk.Scrollbar(parent, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.grid(row=3, column=1, sticky='ns')
         self.tree.grid(row=3, column=0)
 
-        self.tree['columns'] = columns
-        for i, col in enumerate(columns):
-            self.tree.column(i, width=self._cal_width(col, 0), anchor='e')
-            self.tree.heading(i, text=col)
+        # self.tree['columns'] = columns
+        # for i, col in enumerate(columns):
+        #     self.tree.column(i, width=self._cal_width(col, 0), anchor='e')
+        #     self.tree.heading(i, text=col)
 
         # self.tree.pack(fill='both', expand=True)
         self.tree.bind('<Double-1>', self._on_double_click)
@@ -44,6 +43,10 @@ class BaseAppListView(ttk.Frame):
         """Populates table with provided values, uses values[id_index] as id
         which used in row_click callback if such has been set"""
         self.tree.delete(*self.tree.get_children())
+        self.tree['columns'] = self.table_columns
+        for i, col in enumerate(self.table_columns):
+            self.tree.column(i, width=self._cal_width(col, valuess[0][i]), anchor='e')
+            self.tree.heading(i, text=col)
         for values in valuess:
             self.tree.insert('', 'end', iid=str(values[id_index]), values=values)
 
