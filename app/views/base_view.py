@@ -44,7 +44,7 @@ class BaseAppListView(ttk.Frame):
         self.tree.delete(*self.tree.get_children())
         self.tree['columns'] = self.table_columns
         for i, col in enumerate(self.table_columns):
-            self.tree.column(i, width=self._cal_width(col, valuess[0][i]), anchor='e')
+            self.tree.column(i, width=self._cal_width(col, valuess[0][i] if valuess else 0), anchor='e')
             self.tree.heading(i, text=col)
         for values in valuess:
             self.tree.insert('', 'end', iid=str(values[id_index]), values=values)

@@ -4,6 +4,7 @@ from typing import List
 from tkinter import ttk
 
 from app.controllers.acceptor_controller import AcceptorController
+from app.controllers.donor_controller import DonorController
 from db import models
 
 
@@ -17,6 +18,10 @@ class App:
         acceptor_tab = ttk.Frame(notebook)
         notebook.add(acceptor_tab, text="Acceptors")
         AcceptorController(acceptor_tab)
+
+        donors_tab = ttk.Frame(notebook)
+        notebook.add(donors_tab, text="Donors")
+        DonorController(donors_tab)
 
     def run(self):
         self.root.mainloop()
@@ -43,7 +48,6 @@ class Demo(App):
         notebook.add(acceptor_tab, text="Acceptors")
 
         acceptors = self.qs.fetch_all(models.Acceptor)
-        self.display_table(acceptors, parent=acceptor_tab, title="Acceptors", on_row_selected=self.on_row_selected)
 
     def on_row_selected(self, event):
         tree = event.widget  # This is the Treeview
