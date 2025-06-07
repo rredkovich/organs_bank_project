@@ -10,6 +10,7 @@ from typing import List
 db_name = 'dev.db'
 
 conn = sqlite3.connect(db_name)
+conn.execute("PRAGMA foreign_keys = ON")
 
 # initialise_db.create_tables(conn)
 # initialise_db.prefill_lib_data(conn)
@@ -31,8 +32,13 @@ class App:
 class Demo(App):
     def __init__(self):
         super().__init__()
+        notebook = ttk.Notebook(self.root)
+        notebook.pack(fill="both", expand=True)
+        acceptor_tab = ttk.Frame(notebook)
+        notebook.add(acceptor_tab, text="Acceptors")
+
         acceptors = self.qs.fetch_all(models.Acceptor)
-        self.display_table(acceptors, title="Acceptors", on_row_selected=self.on_row_selected)
+        self.display_table(acceptors, parent=acceptor_tab, title="Acceptors", on_row_selected=self.on_row_selected)
 
     def on_row_selected(self, event):
         tree = event.widget  # This is the Treeview
@@ -51,15 +57,17 @@ class Demo(App):
             label = ttk.Label(top, text=f"{self.tree['columns'][i]}: {value}")
             label.pack(anchor='w', padx=10, pady=5)
 
-    def display_table(self, entities=List["BaseDT"], title="", on_row_selected=None):
-        self.main_title = tk.Label(self.root, text='Display a 2D table', font='Arial 24')
-        self.title = tk.Label(self.root, text='Click on header to sort')
+    def display_table(self, entities: List["BaseDT"], parent=None,  title="", on_row_selected=None):
+        if not parent:
+            parent = self.root
+        self.main_title = tk.Label(parent, text='Display a 2D table', font='Arial 24')
+        self.title = tk.Label(parent, text='Click on header to sort')
         self.main_title.grid(row=0, column=0)
         self.title.grid(row=1, column=0)
 
-        tree = ttk.Treeview(self.root)
+        tree = ttk.Treeview(parent)
         self.tree = tree
-        scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=tree.yview)
+        scrollbar = ttk.Scrollbar(parent, orient="vertical", command=tree.yview)
         tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.grid(row=3, column=1, sticky='ns')
         tree.grid(row=3, column=0)

@@ -2,3 +2,4 @@
 .venv
 *.db
 tk_table.py.BAK
+__pycache__
