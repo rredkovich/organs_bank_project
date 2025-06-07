@@ -125,16 +125,15 @@ def test_delete(organ_kidney_a_negative, db_connection):
     pass
 
 
-def test_fetch_one(organ_kidney_a_negative, db_connection):
+def test_fetch_one(acceptor1, db_connection):
     qc = QueryService(db_connection)
 
-    created = qc.create(organ_kidney_a_negative)
-    assert created.organ_id is not None
+    created = qc.create(acceptor1)
+    assert created.acceptor_id is not None
+    acceptor1.acceptor_id = created.acceptor_id
 
-    fetched = qc.fetch_one(created.organ_id, organ_kidney_a_negative.__class__)
-    assert fetched.organ_id == created.organ_id
-    assert fetched.organ_name == organ_kidney_a_negative.organ_name
-    assert fetched.blood_type == organ_kidney_a_negative.blood_type
+    fetched = qc.fetch_one(created.acceptor_id, acceptor1.__class__)
+    assert acceptor1 == fetched
 
 
 def test_fetch_filtered(organ_kidney_a_negative, organ_kidney_b_positive, db_connection):
@@ -152,6 +151,7 @@ def test_fetch_filtered(organ_kidney_a_negative, organ_kidney_b_positive, db_con
 
     assert kidneys == [one, two]
 
+
 def test_add_photo(acceptor, acceptor_photo, db_connection):
     """Testing to be sure that bytes are stored as intended"""
     qs = QueryService(db_connection)
@@ -163,10 +163,11 @@ def test_add_photo(acceptor, acceptor_photo, db_connection):
 
     stmt = "select * from acceptor_photos where acceptor_id = ?"
     cur = db_connection.cursor()
-    cur.execute(stmt, (acceptor.acceptor_id, ))
+    cur.execute(stmt, (acceptor.acceptor_id,))
     data = cur.fetchone()
 
     assert data[1] == acceptor_photo.photo
+
 
 def test_fetch_all(db_connection, acceptor1, acceptor2, acceptor3):
     cur = db_connection.cursor()
@@ -186,3 +187,13 @@ def test_fetch_all(db_connection, acceptor1, acceptor2, acceptor3):
     assert all_accs == [one, three, two]
 
 
+def test_format_dates(db_connection, acceptor):
+    acceptor.registration_date = '2029-01-01'
+    acceptor.birthdate = '1970-01-02'
+
+    qs = QueryService(db_connection)
+
+    qs._format_dates(acceptor)
+
+    assert acceptor.registration_date == date(2029, 1, 1)
+    assert acceptor.birthdate == date(1970, 1, 2)

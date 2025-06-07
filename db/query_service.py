@@ -2,6 +2,7 @@
 CRUD Operations
 """
 import sqlite3
+from datetime import datetime
 from . import utilities
 from dataclasses import fields
 from typing import List, Tuple, Any
@@ -91,7 +92,18 @@ class QueryService:
         cursor = self.conn.cursor()
         cursor.execute(stmt, (id,))
         fetched = cursor.fetchone()
-        return klass(*fetched)
+        obj = klass(*fetched)
+        self._format_dates(obj)
+
+        return obj
+
+    def _format_dates(self, dc: "BaseDT"):
+        """Parses dates from text (default sqlite representation) into datetime.date object"""
+        date_fields = [f.name for f in fields(dc) if 'date' in f.name]
+
+        for df in date_fields:
+            formated = datetime.fromisoformat(getattr(dc, df)).date()
+            setattr(dc, df, formated)
 
     def fetch_filtered(self, filter_field: str, value: Any, klass: "BaseDT") -> List["BaseDT"]:
         """Fetches DB records from a table which corresponds to the klass by provided field's value,
@@ -114,4 +126,5 @@ class QueryService:
         cursor.execute(stmt)
         fetched = cursor.fetchall()
         objs = [klass(*row) for row in fetched]
+        [self._format_dates(obj) for obj in objs]
         return objs
