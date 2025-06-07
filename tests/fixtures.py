@@ -151,7 +151,7 @@ def acceptor4():
 
 @pytest.fixture
 def man_photo():
-    with open("./man-face.jpg", "rb") as f:
+    with open("./man-face.png", "rb") as f:
         photo = f.read()
     return photo
 

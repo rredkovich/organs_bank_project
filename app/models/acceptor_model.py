@@ -19,7 +19,7 @@ class AcceptorModel(BaseModel):
     def save(self, acceptor, photo, organs):
         self.qs.update(acceptor)
         if photo is not None:
-            self.qs.update(db.AcceptorPhoto(acceptor.acceptor_id, photo))
+            self.qs.update_or_create(db.AcceptorPhoto(acceptor.acceptor_id, photo))
         # self.qs.fetch_filtered("acceptor_id", acceptor.acceptor_id, db.AwaitedOrgan)  # remove old?
         # for organ in organs:
         #     self.qs.create(db.AwaitedOrgan(acceptor.acceptor_id, organ))

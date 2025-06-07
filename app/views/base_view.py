@@ -98,7 +98,7 @@ class PersonBaseDetailAppView(tk.Toplevel):
     def show_image(self):
         try:
             self.tk_image = tk.PhotoImage(data=self.photo_data)
-            self.image_label.configure(image=self.tk_image) #, width=100, height=100)
+            self.image_label.configure(image=self.tk_image)
             self.image_label.image = self.tk_image
         except Exception as e:
             messagebox.showerror("Error", f"Invalid image: {e}")
@@ -114,7 +114,8 @@ class PersonBaseDetailAppView(tk.Toplevel):
             self.person.phone = self.entries["phone"].get()
             self.person.address = self.entries["address"].get()
             self.person.notes = self.entries["notes"].get()
-            organs = list(self.organ_listbox.get(0, tk.END))
+            # organs = list(self.organ_listbox.get(0, tk.END))
+            organs = []
             self.on_save(self.person, self.photo_data, organs)
             self.destroy()
         except Exception as e:

@@ -1,6 +1,6 @@
 from db.query_service import QueryService
 from db.models import AwaitedOrgan
-from fixtures import *
+from .fixtures import *
 
 
 def test_prepare_dataclass(db_connection, gender_male):
@@ -106,7 +106,8 @@ def test_update(organ_kidney_a_negative, db_connection):
 
     created_organ.blood_type = 'B+'
 
-    qs.update(created_organ)
+    updated = qs.update(created_organ)
+    assert updated is not None
 
     # assert awaited_organ.id is not None
 
@@ -118,6 +119,13 @@ def test_update(organ_kidney_a_negative, db_connection):
     assert result["organ_name"] == organ_kidney_a_negative.organ_name
     assert result["blood_type"] == "B+"
     db_connection.commit()
+
+def test_update_or_create(db_connection, acceptor4):
+    qs = QueryService(db_connection)
+    precreated_id = acceptor4.acceptor_id
+    created = qs.update_or_create(acceptor4)
+    assert created is not None
+    assert precreated_id != acceptor4.acceptor_id
 
 
 def test_delete(organ_kidney_a_negative, db_connection):

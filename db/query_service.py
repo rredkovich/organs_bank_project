@@ -84,7 +84,18 @@ class QueryService:
         cursor = self.conn.cursor()
         cursor.execute(stmt, values)
         updated = cursor.fetchone()
+        if updated:
+            cols = [f.name for f in fields(dc) if f.name.endswith("_id")]
+            setattr(dc, cols[0], updated[0])
+            to_return = dc
+        else:
+            to_return = None
+
         self.conn.commit()
+        return to_return
+
+    def update_or_create(self, dc: "BaseDT"):
+        return self.update(dc) or self.create(dc)
 
     def fetch_one(self, id: int, klass: "BaseDT") -> "BaseDT":
         """Fetches DB record from a table which corresponds to the klass by provided id,
