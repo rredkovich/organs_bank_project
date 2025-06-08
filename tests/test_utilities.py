@@ -1,5 +1,5 @@
 from db.utilities import camel_to_snake, pluralize, class_to_table_name, primary_key_by_class
-from db.models import BloodType, Gender, Organ
+from db.models import BloodType, Gender, OrganName
 
 
 def test_camel_to_snake():
@@ -20,6 +20,6 @@ def test_class_to_table_name():
 
 
 def test_gather_primary_key_by_class():
-    organ = Organ(1, "kidney", "AB+")
+    organ = OrganName(1, "kidney")
 
     assert primary_key_by_class(organ.__class__) == "organ_id"

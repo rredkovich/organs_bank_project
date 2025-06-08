@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime, date
 
 from db.initialise_db import init_db
-from db.models import BloodType, Organ, Gender, Acceptor, Donor, AcceptorPhoto, DonatedOrgan
+from db.models import BloodType, Gender, Acceptor, Donor, AcceptorPhoto, DonatedOrgan, OrganName
 
 
 @pytest.fixture
@@ -37,45 +37,42 @@ def blood_type_a_negative():
     return BloodType("A-")
 
 @pytest.fixture
-def organ_heart_a_positive(blood_type_a_positive):
-    return Organ(
-        organ_id=1,
+def organ_heart(blood_type_a_positive):
+    return OrganName(
         organ_name="heart",
-        blood_type=blood_type_a_positive.blood_type
     )
-
-# TODO: fixture reuse don't work here!
-@pytest.fixture
-def organ_kidney_a_negative(blood_type_a_negative):
-    return Organ(
-        organ_id=2,
-        organ_name="kidney",
-        blood_type=blood_type_a_negative.blood_type
-    )
-
-@pytest.fixture
-def organ_kidney_b_positive():
-    return Organ(
-        organ_id=2,
-        organ_name="kidney",
-        blood_type="B+"
-    )
-
-@pytest.fixture
-def blood_a_positive(blood_type_a_positive):
-    return Organ(
-        organ_id=0,
-        organ_name="blood",
-        blood_type=blood_type_a_positive.blood_type
-    )
-
-@pytest.fixture
-def blood_a_negative(blood_type_a_negative):
-    return Organ(
-        organ_id=0,
-        organ_name="blood",
-        blood_type=blood_type_a_negative.blood_type
-    )
+#
+# @pytest.fixture
+# def organ_kidney_a_negative(blood_type_a_negative):
+#     return Organ(
+#         organ_id=2,
+#         organ_name="kidney",
+#         blood_type=blood_type_a_negative.blood_type
+#     )
+#
+# @pytest.fixture
+# def organ_kidney_b_positive():
+#     return Organ(
+#         organ_id=2,
+#         organ_name="kidney",
+#         blood_type="B+"
+#     )
+#
+# @pytest.fixture
+# def blood_a_positive(blood_type_a_positive):
+#     return Organ(
+#         organ_id=0,
+#         organ_name="blood",
+#         blood_type=blood_type_a_positive.blood_type
+#     )
+#
+# @pytest.fixture
+# def blood_a_negative(blood_type_a_negative):
+#     return Organ(
+#         organ_id=0,
+#         organ_name="blood",
+#         blood_type=blood_type_a_negative.blood_type
+#     )
 
 @pytest.fixture
 def acceptor(gender_female, blood_type_a_negative):
@@ -182,6 +179,10 @@ def donor_a_negative(blood_type_a_negative, gender_male):
     )
 
 @pytest.fixture
+def blood():
+    return OrganName(organ_name='blood')
+
+@pytest.fixture
 def donated_blood():
     return DonatedOrgan(
     donor_id=0,
@@ -200,7 +201,8 @@ def donated_blood2():
 
 @pytest.fixture
 def man_photo():
-    with open("./man-face.png", "rb") as f:
+    # path = Path("tests")
+    with open("tests/man-face.png", "rb") as f:
         photo = f.read()
     return photo
 

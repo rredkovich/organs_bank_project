@@ -141,7 +141,9 @@ class QueryService:
         cursor = self.conn.cursor()
         cursor.execute(stmt, (value, ))
         fetched = cursor.fetchall()
-        return [klass(*row) for row in fetched]
+        objs = [klass(*row) for row in fetched]
+        [self._format_dates(obj) for obj in objs]
+        return objs
 
     def fetch_all(self, klass: "BaseDT") -> List["BaseDT"]:
         """Fetches all records from the table which corresponds to the klass.

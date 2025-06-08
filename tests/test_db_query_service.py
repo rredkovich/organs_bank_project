@@ -1,3 +1,4 @@
+from datetime import datetime
 from db.query_service import QueryService, OrganMatchQueryService
 from db.models import AwaitedOrgan
 from .fixtures import *
@@ -12,12 +13,12 @@ def test_prepare_dataclass(db_connection, gender_male):
     assert vals == ("male",)
 
 
-def test_prepare_dataclass_many_fields(db_connection, organ_heart_a_positive):
+def test_prepare_dataclass_many_fields(db_connection, acceptor_photo):
     qs = QueryService(db_connection)
-    t_name, cols, vals = qs._prepare_dataclass(organ_heart_a_positive)
-    assert t_name == "organs"
-    assert cols == ("organ_id", "organ_name", "blood_type",)
-    assert vals == (organ_heart_a_positive.organ_id, organ_heart_a_positive.organ_name, organ_heart_a_positive.blood_type,)
+    t_name, cols, vals = qs._prepare_dataclass(acceptor_photo)
+    assert t_name == "acceptor_photos"
+    assert cols == ("acceptor_id", "photo",)
+    assert vals == (acceptor_photo.acceptor_id, acceptor_photo.photo,)
 
 
 def test_prepare_insert_stmt(db_connection, gender_male):
@@ -28,11 +29,11 @@ def test_prepare_insert_stmt(db_connection, gender_male):
     assert values == ("male",)
 
 
-def test_prepare_insert_stmt_many_fields(db_connection, organ_heart_a_positive):
+def test_prepare_insert_stmt_many_fields(db_connection, acceptor_a_pos):
     qs = QueryService(db_connection)
-    sql, values = qs._prepare_insert_stmt(organ_heart_a_positive)
-    assert sql == "INSERT INTO organs (organ_name, blood_type) VALUES (?, ?) RETURNING *"
-    assert values == ("heart", "A+",)
+    sql, values = qs._prepare_insert_stmt(acceptor_a_pos)
+    assert sql == 'INSERT INTO acceptors (name, registration_date, birthdate, blood_type, gender, height, weight, phone, address, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *'
+    assert values == ('Alice Novak', datetime(2024, 5, 12).date(), datetime(1990, 8, 25).date(), 'A+', 'female', 165, 58, '555-1234', '123 Maple Street, Springfield', 'Diabetic')
 
 
 def test_prepare_update_stmt_one_field(gender_male, db_connection):
@@ -43,46 +44,46 @@ def test_prepare_update_stmt_one_field(gender_male, db_connection):
     assert values == ("male",)
 
 
-def test_prepare_update_stmt_many_fields_lib_table(organ_heart_a_positive, db_connection):
+def test_prepare_update_stmt_many_fields_lib_table(acceptor_a_pos, db_connection):
     qs = QueryService(db_connection)
 
-    sql, values = qs._prepare_update_stmt(organ_heart_a_positive)
-    assert sql == ("UPDATE organs SET organ_name = ?, blood_type = ? WHERE organ_id = ? "
-                   "RETURNING organ_id, organ_name, blood_type")
-    assert values == ("heart", "A+", 1)
+    sql, values = qs._prepare_update_stmt(acceptor_a_pos)
+    assert sql == ("UPDATE acceptors SET name = ?, registration_date = ?, birthdate = ?, blood_type = ?, gender = ?, "
+        "height = ?, weight = ?, phone = ?, address = ?, notes = ? WHERE acceptor_id = ? RETURNING acceptor_id, name, "
+        "registration_date, birthdate, blood_type, gender, height, weight, phone, address, notes")
+    assert values == ('Alice Novak', datetime(2024, 5, 12).date(), datetime(1990, 8, 25).date(), 'A+', 'female', 165, 58, '555-1234', '123 Maple Street, Springfield', 'Diabetic', 1)
 
 
-def test_prepare_delete_stmt(organ_heart_a_positive, db_connection):
+def test_prepare_delete_stmt(acceptor_a_pos, db_connection):
     qs = QueryService(db_connection)
-    sql, values = qs._prepare_delete_stmt(organ_heart_a_positive)
-    assert sql == "DELETE FROM organs WHERE organ_id = ?"
-    assert values == (organ_heart_a_positive.organ_id,)
+    sql, values = qs._prepare_delete_stmt(acceptor_a_pos)
+    assert sql == "DELETE FROM acceptors WHERE acceptor_id = ?"
+    assert values == (acceptor_a_pos.acceptor_id,)
 
 
-def test_create(organ_kidney_a_negative, db_connection):
+def test_create(acceptor_a_pos, db_connection):
     qs = QueryService(db_connection)
 
-    created_organ = qs.create(organ_kidney_a_negative)
+    created_organ = qs.create(acceptor_a_pos)
 
-    assert created_organ.organ_id is not None
+    assert created_organ.acceptor_id is not None
 
     cur = db_connection.cursor()
-    cur.execute("SELECT * FROM organs ORDER BY organ_id DESC LIMIT 1")
+    cur.execute("SELECT * FROM acceptors ORDER BY acceptor_id DESC LIMIT 1")
     columns = (val[0] for val in cur.description)
     result = dict(zip(columns, cur.fetchone()))
-    assert result["organ_id"] == created_organ.organ_id
-    assert result["organ_name"] == organ_kidney_a_negative.organ_name
-    assert result["blood_type"] == organ_kidney_a_negative.blood_type
+    assert result["acceptor_id"] == created_organ.acceptor_id
+    assert result["name"] == acceptor_a_pos.name
+    assert result["blood_type"] == acceptor_a_pos.blood_type
     db_connection.commit()
 
 
-def test_create_with_fk(acceptor, organ_kidney_a_negative, db_connection):
+def test_create_with_fk(acceptor, organ_heart, db_connection):
     qs = QueryService(db_connection)
 
-    kidney = qs.create(organ_kidney_a_negative)
     acceptor = qs.create(acceptor)
 
-    awaited_organ = AwaitedOrgan(acceptor.acceptor_id, kidney.organ_name)
+    awaited_organ = AwaitedOrgan(acceptor.acceptor_id, organ_heart.organ_name)
 
     awaited_organ = qs.create(awaited_organ)
     assert awaited_organ.acceptor_id == acceptor.acceptor_id
@@ -93,44 +94,52 @@ def test_create_with_fk(acceptor, organ_kidney_a_negative, db_connection):
     result = dict(zip(columns, cur.fetchone()))
 
     assert result["acceptor_id"] == acceptor.acceptor_id
-    assert result["organ_name"] == organ_kidney_a_negative.organ_name
+    assert result["organ_name"] == organ_heart.organ_name
     db_connection.commit()
 
 
-def test_update(organ_kidney_a_negative, db_connection):
+def test_update(acceptor_a_pos, db_connection):
     qs = QueryService(db_connection)
 
-    created_organ = qs.create(organ_kidney_a_negative)
+    created = qs.create(acceptor_a_pos)
 
-    assert created_organ.organ_id is not None
+    assert created.acceptor_id is not None
 
-    created_organ.blood_type = 'B+'
+    created.blood_type = 'B-'
 
-    updated = qs.update(created_organ)
+    updated = qs.update(created)
     assert updated is not None
 
     # assert awaited_organ.id is not None
 
     cur = db_connection.cursor()
-    cur.execute("SELECT * FROM organs where organ_id = ?", (created_organ.organ_id,))
+    cur.execute("SELECT * FROM acceptors where acceptor_id = ?", (created.acceptor_id,))
     columns = (val[0] for val in cur.description)
     result = dict(zip(columns, cur.fetchone()))
 
-    assert result["organ_name"] == organ_kidney_a_negative.organ_name
-    assert result["blood_type"] == "B+"
+    assert result["name"] == acceptor_a_pos.name
+    assert result["blood_type"] == "B-"
     db_connection.commit()
 
-def test_update_or_create(db_connection, acceptor4):
+def test_update_or_create(db_connection, acceptor):
     qs = QueryService(db_connection)
-    precreated_id = acceptor4.acceptor_id
-    created = qs.update_or_create(acceptor4)
+    qs.execute("DELETE FROM acceptors")
+    precreated_id = acceptor.acceptor_id
+    created = qs.update_or_create(acceptor)
     assert created is not None
-    assert precreated_id != acceptor4.acceptor_id
+    assert precreated_id != acceptor.acceptor_id
 
 
-def test_delete(organ_kidney_a_negative, db_connection):
+def test_delete(acceptor, db_connection):
     # TODO: allow deletion only from general tables, not library ones
-    pass
+    qs = QueryService(db_connection)
+    created = qs.create(acceptor)
+
+    qs.delete_fitered(created.__class__, 'acceptor_id', created.acceptor_id)
+
+    result  = qs.execute("SELECT COUNT(*) FROM acceptors WHERE acceptor_id = ?", values=(created.acceptor_id, ))
+    assert result[0] == (0,)
+
 
 
 def test_fetch_one(acceptor_a_pos, db_connection):
@@ -144,20 +153,15 @@ def test_fetch_one(acceptor_a_pos, db_connection):
     assert acceptor_a_pos == fetched
 
 
-def test_fetch_filtered(organ_kidney_a_negative, organ_kidney_b_positive, db_connection):
-    cur = db_connection.cursor()
-
-    # erasing previous test data
-    cur.execute("DELETE FROM organs")
-    db_connection.commit()
-
+def test_fetch_filtered(acceptor_a_pos, acceptor3, db_connection):
     qs = QueryService(db_connection)
-    one = qs.create(organ_kidney_a_negative)
-    two = qs.create(organ_kidney_b_positive)
+    qs.execute("DELETE FROM acceptors")
+    one = qs.create(acceptor_a_pos)
+    two = qs.create(acceptor3)
 
-    kidneys = qs.fetch_filtered('organ_name', 'kidney', one.__class__)
+    accs = qs.fetch_filtered('gender', one.gender, one.__class__)
 
-    assert kidneys == [one, two]
+    assert accs == [one, two]
 
 
 def test_add_photo(acceptor, acceptor_photo, db_connection):
@@ -212,7 +216,7 @@ def test_fetch_matched_donated_organs(db_connection,
                                       donated_blood,
                                       donated_blood2,
                                       acceptor_a_pos,
-                                      blood_a_positive
+                                      blood
                                       ):
     qs = QueryService(db_connection)
     qs.execute("DELETE FROM acceptors")
@@ -238,7 +242,7 @@ def test_fetch_matched_donated_organs(db_connection,
     # adding requests for some blood
     requested_blood = AwaitedOrgan(
         acceptor_id=acceptor.acceptor_id,
-        organ_name=blood_a_positive.organ_name
+        organ_name=blood.organ_name
     )
     qs.create(requested_blood)
 
