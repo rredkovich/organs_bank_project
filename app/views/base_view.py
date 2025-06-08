@@ -2,6 +2,7 @@ import datetime
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from typing import List, Any
+from .utilities import calc_column_width
 
 
 class BaseAppListView(ttk.Frame):
@@ -25,10 +26,6 @@ class BaseAppListView(ttk.Frame):
         # self.tree.pack(fill='both', expand=True)
         self.tree.bind('<Double-1>', self._on_double_click)
 
-    def _cal_width(self, col_name, col_value):
-        widest = max((col_name, col_value, ), key=lambda x: len(str(x)))
-        return round(len(str(widest)) * 10 + len(str(widest)) * 0.45)
-
     def register_row_click(self, callback):
         """Registers callback for item click. Calls with item ID, which is first element in column by default"""
         self.double_click_callback = callback
@@ -44,7 +41,7 @@ class BaseAppListView(ttk.Frame):
         self.tree.delete(*self.tree.get_children())
         self.tree['columns'] = self.table_columns
         for i, col in enumerate(self.table_columns):
-            self.tree.column(i, width=self._cal_width(col, valuess[0][i] if valuess else 0), anchor='e')
+            self.tree.column(i, width=calc_column_width(col, valuess[0][i] if valuess else 0), anchor='e')
             self.tree.heading(i, text=col)
         for values in valuess:
             self.tree.insert('', 'end', iid=str(values[id_index]), values=values)
@@ -69,7 +66,7 @@ class PersonBaseDetailAppView(tk.Toplevel):
             self.entries[field] = entry
 
         # Image preview
-        self.image_label = ttk.Label(self, width=40)
+        self.image_label = ttk.Label(self, width=20)
         self.image_label.grid(row=0, column=0, rowspan=len(fields))
         self.photo_data = photo.photo if photo else None
         if self.photo_data:

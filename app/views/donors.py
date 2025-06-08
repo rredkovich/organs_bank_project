@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from .base_view import BaseAppListView, PersonBaseDetailAppView, ChoiceDialog
+from .utilities import calc_column_width
 
 
 class DonorListView(BaseAppListView):
@@ -21,14 +22,15 @@ class DonorDetailsView(PersonBaseDetailAppView):
         # if organs:
         #     for o in organs:
         #         self.organ_listbox.insert(tk.END, o.organ_name)
-        organs_tree = ttk.Treeview(self)
+        organs_tree = ttk.Treeview(self, show='headings')
         cols = ('organ', 'extraction time', 'expiration time',)
         organs_tree['columns'] = cols
+        organs_tree.grid(row=1, column=3, rowspan=6)
         for organ in organs:
             organs_tree.insert('', 'end', values=(organ.organ_name, organ.extraction_ts, organ.expiration_ts))
 
         for i, col in enumerate(cols):
-            organs_tree.column(i, width=20, anchor='e')
+            organs_tree.column(i, width=calc_column_width(col,1, multiplier=7), anchor='e')
             organs_tree.heading(i, text=col)
 
         self.organs_tree = organs_tree
