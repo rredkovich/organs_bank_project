@@ -13,7 +13,7 @@ class AcceptorAppListVeiw(BaseAppListView):
 class AcceptorAppDetailsView(PersonBaseDetailAppView):
     def __init__(self, parent, acceptor, photo, on_save=None, organs=None,
                  choices={'organ_names': [], 'blood_types': [], 'genders': []}):
-        super().__init__(parent, acceptor, photo, on_save)
+        super().__init__(parent, acceptor, photo, choices, on_save)
 
         self.choices = choices
 

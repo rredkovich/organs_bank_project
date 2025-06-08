@@ -42,9 +42,9 @@ class BaseAppListView(ttk.Frame):
 
 
 class PersonBaseDetailAppView(tk.Toplevel):
-    # TODO: Organs are different for donor and acceptor, should be moved to a mixin?..
-    def __init__(self, parent, person, photo, on_save):
-    # def __init__(self, parent, person, labels, values, photo, on_save=None):
+    INPUT_WIDTH = 20
+
+    def __init__(self, parent, person, photo, choices, on_save):
         super().__init__(parent)
         self.person = person
         self.on_save = on_save
@@ -54,10 +54,21 @@ class PersonBaseDetailAppView(tk.Toplevel):
         fields = ["name", "birthdate", "blood_type", "gender", "height", "weight", "phone", "address", "notes"]
         for i, field in enumerate(fields):
             ttk.Label(self, text=field.capitalize()).grid(row=i, column=1, sticky='e')
-            entry = ttk.Entry(self)
-            entry.insert(0, str(getattr(self.person, field) or ""))
-            entry.grid(row=i, column=2)
-            self.entries[field] = entry
+            value = str(getattr(self.person, field) or "")
+            if field == 'blood_type':
+                widget = ttk.Combobox(self, values=choices['blood_types'], state='readonly', width=self.INPUT_WIDTH-2)
+                widget.grid(row=i, column=2)
+                widget.set(value=value)
+            elif field ==  'gender':
+                widget = ttk.Combobox(self, values=choices['genders'], state='readonly', width=self.INPUT_WIDTH-2)
+                widget.grid(row=i, column=2)
+                widget.set(value=value)
+            else:
+                widget = ttk.Entry(self, width=self.INPUT_WIDTH)
+                widget.insert(0, str(getattr(self.person, field) or ""))
+
+                widget.grid(row=i, column=2)
+            self.entries[field] = widget
 
         # Image preview
         self.image_label = ttk.Label(self, width=20)

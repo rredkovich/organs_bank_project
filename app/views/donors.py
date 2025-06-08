@@ -14,7 +14,7 @@ class DonorListView(BaseAppListView):
 class DonorDetailsView(PersonBaseDetailAppView):
     def __init__(self, parent, donor, photo, on_save=None, organs=None,
                  choices={'organ_names': [], 'blood_types': [], 'genders': []}):
-        super().__init__(parent, donor, photo, on_save)
+        super().__init__(parent, donor, photo, choices, on_save)
 
         self.choices = choices
 
