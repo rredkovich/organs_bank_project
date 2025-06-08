@@ -7,7 +7,7 @@ class BaseAppController:
 
     def refresh(self):
         self.view.populate()
-        
+
     def open_detail(self, *args, **kwargs):
         raise Exception("Not implemented")
 

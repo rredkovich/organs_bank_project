@@ -89,8 +89,8 @@ class PersonBaseDetailAppView(tk.Toplevel):
 
     def save(self):
         try:
-            self.person.name = self.entries["name"].get()
-            self.person.birthdate = datetime.datetime.strptime(self.entries["birthdate"].get(), "%Y-%m-%d")
+            self.person.name = self.entries["name"].get().strip()
+            self.person.birthdate = datetime.datetime.strptime(self.entries["birthdate"].get().strip(), "%Y-%m-%d")
             self.person.blood_type = self.entries["blood_type"].get()
             self.person.gender = self.entries["gender"].get()
             self.person.height = int(self.entries["height"].get()) if self.entries["height"].get() else None

@@ -8,6 +8,7 @@ def initialise_from_scratch(conn):
     initialise_db.prefill_lib_data(conn)
 
 
+
 if __name__ == '__main__':
     # initialise_from_scratch(db_connection)
     app = App()

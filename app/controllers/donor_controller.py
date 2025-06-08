@@ -23,6 +23,12 @@ class DonorController:
         donor, photo, organs = self.model.get_details(donor_id)
         DonorDetailsView(self.view, donor, photo, self.save, organs=organs, choices=self.model.possible_choices)
 
+    def create_new(self):
+        donor = self.model.create_new()
+        photo = b''
+        organs = []
+        DonorDetailsView(self.view, donor, photo, self.save, organs=organs, choices=self.model.possible_choices)
+
     def save(self, donor, photo, organs):
         self.model.save(donor, photo, organs)
         self.refresh()

@@ -69,8 +69,8 @@ class DonatedOrganDialog(tk.simpledialog.Dialog):
 
     def apply(self):
         try:
-            extraction = self.entries["extraction"].get()
-            expiration = self.entries["expiration"].get()
+            extraction = self.entries["extraction"].get().strip()
+            expiration = self.entries["expiration"].get().strip()
             if expiration:
                 expiration = datetime.datetime.strptime(expiration, '%Y-%m-%d').date()
             if extraction:

@@ -1,4 +1,5 @@
 from typing import List
+from datetime import datetime
 from db import models as db
 from .base_model import  BaseModel
 
@@ -16,8 +17,23 @@ class AcceptorModel(BaseModel):
         organs = self.qs.fetch_filtered("acceptor_id", acceptor_id, db.AwaitedOrgan)
         return acceptor, photo, organs
 
+    def create_new(self) -> db.Acceptor:
+        return db.Acceptor(
+            acceptor_id=0,
+            name='',
+            registration_date=datetime.now().date(),
+            birthdate='',
+            blood_type='',
+            gender='',
+            height='',
+            weight='',
+            phone='',
+            address='',
+            notes=''
+        )
+
     def save(self, acceptor, photo, organs):
-        self.qs.update(acceptor)
+        self.qs.update_or_create(acceptor)
         if photo is not None:
             self.qs.update_or_create(db.AcceptorPhoto(acceptor.acceptor_id, photo))
         self.qs.delete_fitered(db.AwaitedOrgan, field='acceptor_id', value=acceptor.acceptor_id)

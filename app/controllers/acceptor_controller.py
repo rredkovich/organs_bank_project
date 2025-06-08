@@ -20,6 +20,12 @@ class AcceptorController:
 
         self.view.populate(valuess, id_index)
 
+    def create_new(self):
+        acceptor = self.model.create_new()
+        photo = b''
+        organs = []
+        AcceptorAppDetailsView(self.view, acceptor, photo, self.save, organs=organs, choices=self.model.possible_choices)
+
     def open_detail(self, acceptor_id):
         acceptor, photo, organs = self.model.get_details(acceptor_id)
         AcceptorAppDetailsView(self.view, acceptor, photo, self.save, organs=organs, choices=self.model.possible_choices)
