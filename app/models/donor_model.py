@@ -22,4 +22,4 @@ class DonorModel(BaseModel):
             self.qs.update_or_create(db.DonorPhoto(donor.donor_id, photo))
         self.qs.delete_fitered(db.DonatedOrgan, field='donor_id', value=donor.donor_id)
         for organ in organs:
-            self.qs.create(db.DonatedOrgan(donor.donor_id, organ))
+            self.qs.create(db.DonatedOrgan(donor.donor_id, *organ))

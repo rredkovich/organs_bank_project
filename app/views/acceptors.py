@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+from typing import List, Any
+
 from .base_view import BaseAppListView, PersonBaseDetailAppView, ChoiceDialog
 
 
@@ -32,3 +34,6 @@ class AcceptorAppDetailsView(PersonBaseDetailAppView):
     def remove_organ(self):
         for i in reversed(self.organ_listbox.curselection()):
             self.organ_listbox.delete(i)
+
+    def fetch_organs_list(self) -> List[Any]:
+        return list(self.organ_listbox.get(0, tk.END))

@@ -18,12 +18,6 @@ class BaseAppListView(ttk.Frame):
         scrollbar.grid(row=3, column=1, sticky='ns')
         self.tree.grid(row=3, column=0)
 
-        # self.tree['columns'] = columns
-        # for i, col in enumerate(columns):
-        #     self.tree.column(i, width=self._cal_width(col, 0), anchor='e')
-        #     self.tree.heading(i, text=col)
-
-        # self.tree.pack(fill='both', expand=True)
         self.tree.bind('<Double-1>', self._on_double_click)
 
     def register_row_click(self, callback):
@@ -90,6 +84,9 @@ class PersonBaseDetailAppView(tk.Toplevel):
         except Exception as e:
             messagebox.showerror("Error", f"Invalid image: {e}")
 
+    def fetch_organs_list(self) -> List[Any]:
+        raise NotImplemented("Implement in subclass")
+
     def save(self):
         try:
             self.person.name = self.entries["name"].get()
@@ -101,7 +98,7 @@ class PersonBaseDetailAppView(tk.Toplevel):
             self.person.phone = self.entries["phone"].get()
             self.person.address = self.entries["address"].get()
             self.person.notes = self.entries["notes"].get()
-            organs = list(self.organ_listbox.get(0, tk.END))
+            organs = self.fetch_organs_list()
             self.on_save(self.person, self.photo_data, organs)
             self.destroy()
         except Exception as e:
