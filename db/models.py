@@ -18,12 +18,6 @@ class OrganName:
     organ_name: str
 
 @dataclass
-class Organ:
-    organ_id: int
-    organ_name: str
-    blood_type: str
-
-@dataclass
 class Donor:
     donor_id: int
     name: str

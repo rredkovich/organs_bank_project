@@ -10,6 +10,12 @@ def initialise_from_scratch(conn):
 
 
 if __name__ == '__main__':
-    # initialise_from_scratch(db_connection)
-    app = App()
-    app.run()
+    try:
+        app = App()
+        app.run()
+    except sqlite3.OperationalError as e:
+        if str(e) == 'no such table: acceptors':
+            initialise_from_scratch(db_connection)
+
+        app = App()
+        app.run()

@@ -19,17 +19,6 @@ CREATE TABLE organ_names (
 );
 """
 
-create_table_organs = """
-CREATE TABLE organs (
-    organ_id         INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    organ_name TEXT NOT NULL,
-    blood_type TEXT NOT NULL,
-    created_at  DATETIME  NOT NULL default CURRENT_TIMESTAMP,
-    FOREIGN KEY (organ_name) REFERENCES organ_names(organ_name) ON UPDATE CASCADE,
-    FOREIGN KEY (blood_type) REFERENCES blood_types(blood_type) ON UPDATE CASCADE
-);
-"""
-
 create_table_donors = """
 CREATE TABLE donors (
     donor_id            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -110,7 +99,6 @@ all_tables = (
     create_table_genders,
     create_table_blood_types,
     create_table_organ_names,
-    create_table_organs,
     create_table_donors,
     create_table_acceptors,
     create_table_donor_photos,
