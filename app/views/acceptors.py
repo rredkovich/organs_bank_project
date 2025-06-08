@@ -11,11 +11,13 @@ class AcceptorAppListVeiw(BaseAppListView):
 
 
 class AcceptorAppDetailsView(PersonBaseDetailAppView):
-    def __init__(self, parent, acceptor, photo, on_save=None, organs=None,
+    def __init__(self, parent, acceptor, photo, on_save=None, organs=None, on_match=None,
                  choices={'organ_names': [], 'blood_types': [], 'genders': []}):
         super().__init__(parent, acceptor, photo, choices, on_save)
 
         self.choices = choices
+        self.acceptor_id = acceptor.acceptor_id
+        self.controller_on_match = on_match
 
         # Organs
         self.organ_listbox = tk.Listbox(self)
@@ -25,6 +27,11 @@ class AcceptorAppDetailsView(PersonBaseDetailAppView):
                 self.organ_listbox.insert(tk.END, o.organ_name)
         ttk.Button(self, text="Add Organ", command=self.add_organ).grid(row=7, column=3)
         ttk.Button(self, text="Remove Selected", command=self.remove_organ).grid(row=8, column=3)
+        ttk.Button(self, text="Find Match", command=self.on_match).grid(row=9, column=3)
+
+    def on_match(self):
+        if self.controller_on_match:
+            return self.controller_on_match(self.acceptor_id)
 
     def add_organ(self):
         name = ChoiceDialog(self, self.choices['organ_names']).result
@@ -37,3 +44,8 @@ class AcceptorAppDetailsView(PersonBaseDetailAppView):
 
     def fetch_organs_list(self) -> List[Any]:
         return list(self.organ_listbox.get(0, tk.END))
+
+
+class AcceptorOrganMatchView(BaseAppListView):
+    def __init__(self, parent, controller, columns, double_click_callback):
+        super().__init__(parent, controller, columns, None)

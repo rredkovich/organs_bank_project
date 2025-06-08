@@ -73,3 +73,13 @@ class DonatedOrgan:
 class AwaitedOrgan:
     acceptor_id: int
     organ_name: Optional[str] = None
+
+@dataclass
+class MatchedOrgan:
+    """Represents donated organ info match for an awaited organ"""
+    donor_id: int
+    organ_name: str
+    blood_type: str
+    donor_name: str
+    extraction_ts: Optional[datetime] = None
+    expiration_ts: Optional[datetime] = None

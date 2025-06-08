@@ -11,6 +11,7 @@ from typing import List, Tuple, Any
 # TODO: put primary_key_by_class utility function to other module and move its call from query service? possible leaking
 # abstraction to call it from here
 from db.utilities import primary_key_by_class
+from . import models as db_models
 
 
 # If have time, going to add order in fetch_all / fetch_filtered
@@ -21,10 +22,12 @@ class QueryService:
     def __init__(self, conn: sqlite3.Connection):
         self.conn = conn
 
-    def execute(self, query: str):
-        cur = self.db.cursor()
-        cur.execute(query)
-        cur.fetchall()
+    def execute(self, query: str, values: Tuple[Any]=tuple()):
+        cur = self.conn.cursor()
+        cur.execute(query, values)
+        data = cur.fetchall()
+        self.conn.commit()
+        return data
 
     def _prepare_dataclass(self, dc: "BaseDT") -> Tuple[str, Tuple[str], Tuple[Any]]:
         """Prepares basic SQL info from a dataclass,
@@ -152,3 +155,17 @@ class QueryService:
         objs = [klass(*row) for row in fetched]
         [self._format_dates(obj) for obj in objs]
         return objs
+
+
+class OrganMatchQueryService(QueryService):
+    def fetch_matched_donated_organs(self, acceptor_id: int):
+        stmt = """
+            select donors.donor_id, donated_organs.organ_name, donors.blood_type, donors.name donor_name, donated_organs.expiration_ts, donated_organs.expiration_ts from acceptors
+            join awaited_organs using(acceptor_id)
+            join donated_organs using(organ_name)
+            join donors using(donor_id)
+            where acceptors.blood_type = donors.blood_type
+                and acceptors.acceptor_id = ?
+        """
+        records = self.execute(stmt, (acceptor_id, ))
+        return [db_models.MatchedOrgan(*record) for record in records]

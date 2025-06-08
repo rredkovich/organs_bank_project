@@ -29,7 +29,7 @@ class BaseAppListView(ttk.Frame):
         if item_id and self.double_click_callback:
             self.double_click_callback(int(item_id))
 
-    def populate(self, valuess: List[List[Any]], id_index: int):
+    def populate(self, valuess: List[List[Any]], id_index: int = None):
         """Populates table with provided values, uses values[id_index] as id
         which used in row_click callback if such has been set"""
         self.tree.delete(*self.tree.get_children())
@@ -38,7 +38,10 @@ class BaseAppListView(ttk.Frame):
             self.tree.column(i, width=calc_column_width(col, valuess[0][i] if valuess else 0), anchor='e')
             self.tree.heading(i, text=col)
         for values in valuess:
-            self.tree.insert('', 'end', iid=str(values[id_index]), values=values)
+            if id_index is not None:
+                self.tree.insert('', 'end', iid=str(values[id_index]), values=values)
+            else:
+                self.tree.insert('', 'end', values=values)
 
 
 class PersonBaseDetailAppView(tk.Toplevel):
@@ -78,7 +81,7 @@ class PersonBaseDetailAppView(tk.Toplevel):
             self.show_image()
         ttk.Button(self, text="Upload Photo", command=self.upload_photo).grid(row=9, column=0)
 
-        ttk.Button(self, text="Save", command=self.save).grid(row=10, column=2)
+        ttk.Button(self, text="Save", command=self.save).grid(row=9, column=2)
 
     def upload_photo(self):
         path = filedialog.askopenfilename(filetypes=[("Images", "*.png")])
@@ -111,7 +114,7 @@ class PersonBaseDetailAppView(tk.Toplevel):
             self.person.notes = self.entries["notes"].get()
             organs = self.fetch_organs_list()
             self.on_save(self.person, self.photo_data, organs)
-            self.destroy()
+            # self.destroy()
         except Exception as e:
             messagebox.showerror("Validation Error", str(e))
 

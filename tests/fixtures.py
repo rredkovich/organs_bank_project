@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime, date
 
 from db.initialise_db import init_db
-from db.models import BloodType, Organ, Gender, Acceptor, AcceptorPhoto
+from db.models import BloodType, Organ, Gender, Acceptor, Donor, AcceptorPhoto, DonatedOrgan
 
 
 @pytest.fixture
@@ -13,6 +13,7 @@ def photo():
 @pytest.fixture(scope="session")
 def db_connection():
     conn = sqlite3.connect(":memory:")
+    # conn = sqlite3.connect("test.db")
     conn.execute("PRAGMA foreign_keys = ON")
     # setup schema
     init_db(conn)
@@ -36,20 +37,20 @@ def blood_type_a_negative():
     return BloodType("A-")
 
 @pytest.fixture
-def organ_heart():
+def organ_heart_a_positive(blood_type_a_positive):
     return Organ(
         organ_id=1,
         organ_name="heart",
-        blood_type="A+",
+        blood_type=blood_type_a_positive.blood_type
     )
 
 # TODO: fixture reuse don't work here!
 @pytest.fixture
-def organ_kidney_a_negative():
+def organ_kidney_a_negative(blood_type_a_negative):
     return Organ(
         organ_id=2,
         organ_name="kidney",
-        blood_type="A-"
+        blood_type=blood_type_a_negative.blood_type
     )
 
 @pytest.fixture
@@ -60,24 +61,31 @@ def organ_kidney_b_positive():
         blood_type="B+"
     )
 
-# # TODO: fixture reuse don't work here!
-# @pytest.fixture
-# def organ_kidney_a_negative(blood_type_a_negative):
-#     return Organ(
-#         id=2,
-#         organ_name="kidney",
-#         blood_type=blood_type_a_negative.blood_type
-#     )
+@pytest.fixture
+def blood_a_positive(blood_type_a_positive):
+    return Organ(
+        organ_id=0,
+        organ_name="blood",
+        blood_type=blood_type_a_positive.blood_type
+    )
 
 @pytest.fixture
-def acceptor():
+def blood_a_negative(blood_type_a_negative):
+    return Organ(
+        organ_id=0,
+        organ_name="blood",
+        blood_type=blood_type_a_negative.blood_type
+    )
+
+@pytest.fixture
+def acceptor(gender_female, blood_type_a_negative):
     return Acceptor(
         acceptor_id=None,
         name='Lina Doe',
         registration_date=datetime.now().date(),
         birthdate=date(1970, 1, 12),
-        blood_type="A-",
-        gender="female",
+        blood_type=blood_type_a_negative.blood_type,
+        gender=gender_female.gender,
         height=176,
         weight=59,
         phone='0000000',
@@ -86,7 +94,7 @@ def acceptor():
     )
 
 @pytest.fixture
-def acceptor1():
+def acceptor_a_pos():
     return Acceptor(
         acceptor_id=1,
         name="Alice Novak",
@@ -148,6 +156,47 @@ def acceptor4():
         address='',
         notes="Recently added, awaiting full medical evaluation"
     )
+
+@pytest.fixture
+def donor_a_positive(blood_type_a_positive, gender_male):
+    return Donor(
+        donor_id=0,
+        name='John Doe A+',
+        registration_date=datetime.now().date(),
+        birthdate= datetime(1999, 1, 1),
+        blood_type= blood_type_a_positive.blood_type,
+        possible_extraction= datetime.now().date(),
+        gender= gender_male.gender
+    )
+
+@pytest.fixture
+def donor_a_negative(blood_type_a_negative, gender_male):
+    return Donor(
+        donor_id=0,
+        name='John Smith A-',
+        registration_date=datetime.now().date(),
+        birthdate=datetime(1999, 1, 1),
+        blood_type= blood_type_a_negative.blood_type,
+        possible_extraction= datetime.now().date(),
+        gender= gender_male.gender
+    )
+
+@pytest.fixture
+def donated_blood():
+    return DonatedOrgan(
+    donor_id=0,
+    organ_name="blood",
+    extraction_ts=datetime.now().date(),
+    )
+
+@pytest.fixture
+def donated_blood2():
+    return DonatedOrgan(
+        donor_id=0,
+        organ_name="blood",
+        extraction_ts=datetime.now().date(),
+    )
+
 
 @pytest.fixture
 def man_photo():
