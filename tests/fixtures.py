@@ -75,14 +75,14 @@ def organ_heart(blood_type_a_positive):
 #     )
 
 @pytest.fixture
-def acceptor(gender_female, blood_type_a_negative):
+def acceptor():
     return Acceptor(
         acceptor_id=None,
         name='Lina Doe',
         registration_date=datetime.now().date(),
         birthdate=date(1970, 1, 12),
-        blood_type=blood_type_a_negative.blood_type,
-        gender=gender_female.gender,
+        blood_type="A-",
+        gender="female",
         height=176,
         weight=59,
         phone='0000000',
@@ -202,7 +202,7 @@ def donated_blood2():
 @pytest.fixture
 def man_photo():
     # path = Path("tests")
-    with open("tests/man-face.png", "rb") as f:
+    with open("man-face.png", "rb") as f:
         photo = f.read()
     return photo
 

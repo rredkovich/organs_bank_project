@@ -1,5 +1,7 @@
+import pytest
+from tests.fixtures import acceptor
 from db.utilities import camel_to_snake, pluralize, class_to_table_name, primary_key_by_class
-from db.models import BloodType, Gender, OrganName
+from db.models import BloodType, Gender
 
 
 def test_camel_to_snake():
@@ -19,7 +21,6 @@ def test_class_to_table_name():
     assert class_to_table_name(gender.__class__.__name__) == "genders"
 
 
-def test_gather_primary_key_by_class():
-    organ = OrganName(1, "kidney")
+def test_gather_primary_key_by_class(acceptor):
 
-    assert primary_key_by_class(organ.__class__) == "organ_id"
+    assert primary_key_by_class(acceptor.__class__) == "acceptor_id"
