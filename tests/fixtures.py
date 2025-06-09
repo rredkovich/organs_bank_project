@@ -202,7 +202,7 @@ def donated_blood2():
 @pytest.fixture
 def man_photo():
     # path = Path("tests")
-    with open("man-face.png", "rb") as f:
+    with open("tests/man-face.png", "rb") as f:
         photo = f.read()
     return photo
 

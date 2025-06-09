@@ -1,0 +1,1 @@
+INSERT INTO awaited_organs ('acceptor_id', 'organ_name') VALUES ('21', 'heart'),('5', 'blood'),('5', 'blood plasma'),('4', 'heart'),('4', 'intestine'),('2', 'kidney'),('2', 'skin'),('1', 'blood plasma'),('1', 'liver'),('1', 'blood');
